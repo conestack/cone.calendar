@@ -14,3 +14,10 @@ _ = TranslationStringFactory('cone.fullcalendar')
 class FullCalendarTile(Tile):
     """
     """
+
+
+@view_config('calendar', permission='view')
+def calendar(model, request):
+    """Calendar as traversable view.
+    """
+    return render_main_template(model, request, 'calendar')
