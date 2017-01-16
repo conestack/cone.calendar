@@ -1,0 +1,9 @@
+{
+  "name": "fullcalendar",
+  "version": "1.0.0",
+  "dependencies": {},
+  "license": "BSD-3-Clause",
+  "devDependencies": {
+    "fullcalendar": "2.9.1"
+  }
+}
