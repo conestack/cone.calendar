@@ -4,4 +4,6 @@
            i18n:domain="cone.fullcalendar"
            omit-tag="True">
 
+  <div id="calendar"></div>
+
 </tal:block>

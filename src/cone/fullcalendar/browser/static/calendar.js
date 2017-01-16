@@ -10,6 +10,10 @@
     calendar = {
 
         binder: function(context) {
+
+            $('#calendar').fullCalendar({
+            });
+        
         }
     };
 
