@@ -1,4 +1,5 @@
-(function($) {
+/*globals jQuery, bdajax*/
+(function($, bdajax) {
 
     $(document).ready(function() {
         $.extend(bdajax.binders, {
@@ -7,18 +8,28 @@
         calendar.binder();
     });
 
-    calendar = {
+    var calendar = {
+
+        option_mapping: {
+            calendar_header: 'header',
+            calendar_footer: 'footer',
+            calendar_first_day: 'firstDay'
+        },
 
         binder: function(context) {
-            var calendar_elem = $('#calendar', context);
+            var elem = $('#calendar', context);
             var options = {};
-            var header = calendar_elem.data('calendar_header');
-            if (header) {
-                options.header = header;
+            var server_options = elem.data('calendar_options');
+            var name, value;
+            for (name in server_options) {
+                value = server_options[name];
+                if (typeof(value) !== 'undefined') {
+                    options[this.option_mapping[name]] = value;
+                }
             }
-            calendar_elem.fullCalendar(options);
-        
+            elem.fullCalendar(options);
         }
+
     };
 
-})(jQuery);
+})(jQuery, bdajax);

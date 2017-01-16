@@ -35,9 +35,34 @@ Test ``calendar_header`` property::
     ...     'right': 'today prev,next'
     ... }
     >>> render_tile(model, request, 'calendar')
-    u'...<div id="calendar"\n       
-    data-calendar_header=\'{"right": "today prev,next", 
-    "center": "", "left": "title"}\'></div>...'
+    u'...<div id="calendar"\n
+    data-calendar_options=\'{"calendar_header": {"right": "today prev,next",
+    "center": "", "left": "title"}}\'></div>...'
+
+    >>> props.calendar_header = None
+
+test ``calendar_footer`` property::
+
+    >>> props.calendar_footer = {
+    ...     'left': 'title',
+    ...     'center': '',
+    ...     'right': 'today prev,next'
+    ... }
+    >>> render_tile(model, request, 'calendar')
+    u'...<div id="calendar"\n
+    data-calendar_options=\'{"calendar_footer": {"right": "today prev,next",
+    "center": "", "left": "title"}}\'></div>...'
+
+    >>> props.calendar_footer = None
+
+test ``calendar_first_day`` property::
+
+    >>> props.calendar_first_day = 2
+    >>> render_tile(model, request, 'calendar')
+    u'...<div id="calendar"\n
+    data-calendar_options=\'{"calendar_first_day": 2}\'></div>...'
+
+    >>> props.calendar_first_day = None
 
 Cleanup::
 

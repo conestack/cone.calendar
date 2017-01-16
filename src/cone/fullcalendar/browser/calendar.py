@@ -13,13 +13,20 @@ _ = TranslationStringFactory('cone.fullcalendar')
 
 @tile('calendar', 'calendar.pt', permission='view')
 class FullCalendarTile(Tile):
-    """
-    """
+    options_names = [
+        'calendar_header',
+        'calendar_footer',
+        'calendar_first_day'
+    ]
 
     @property
-    def header(self):
-        header = self.model.properties.calendar_header
-        return json.dumps(header) if header else None
+    def options(self):
+        options = {}
+        for name in self.options_names:
+            value = getattr(self.model.properties, name)
+            if value is not None:
+                options[name] = value
+        return json.dumps(options) if options else None
 
 
 @view_config('calendar', permission='view')
