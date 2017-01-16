@@ -27,42 +27,48 @@ Test basic calendar settings::
     >>> model = CalendarNode()
     >>> props = model.properties
 
-Test ``calendar_header`` property::
+Test calendar options property::
 
     >>> props.calendar_header = {
     ...     'left': 'title',
     ...     'center': '',
     ...     'right': 'today prev,next'
     ... }
-    >>> render_tile(model, request, 'calendar')
-    u'...<div id="calendar"\n
-    data-calendar_options=\'{"calendar_header": {"right": "today prev,next",
-    "center": "", "left": "title"}}\'></div>...'
-
-    >>> props.calendar_header = None
-
-test ``calendar_footer`` property::
-
     >>> props.calendar_footer = {
     ...     'left': 'title',
     ...     'center': '',
     ...     'right': 'today prev,next'
     ... }
-    >>> render_tile(model, request, 'calendar')
-    u'...<div id="calendar"\n
-    data-calendar_options=\'{"calendar_footer": {"right": "today prev,next",
-    "center": "", "left": "title"}}\'></div>...'
-
-    >>> props.calendar_footer = None
-
-test ``calendar_first_day`` property::
-
     >>> props.calendar_first_day = 2
+    >>> props.calendar_weekends = False
+    >>> props.calendar_week_numbers = True
+    >>> props.calendar_week_numbers_within_days = True
+    >>> props.calendar_business_hours = [{
+    ...     'dow': [1, 2, 3],
+    ...     'start': '08:00',
+    ...     'end': '18:00'
+    ... }, {
+    ...     'dow': [4, 5],
+    ...     'start': '10:00',
+    ...     'end': '16:00'
+    ... }]
+
     >>> render_tile(model, request, 'calendar')
     u'...<div id="calendar"\n
-    data-calendar_options=\'{"calendar_first_day": 2}\'></div>...'
+    data-calendar_options=\'{"footer": {"right": "today prev,next", "center": "", "left": "title"},
+    "weekends": false, "firstDay": 2,
+    "header": {"right": "today prev,next",
+    "center": "", "left": "title"},
+    "weekNumbers": true,
+    "businessHours": [{"start": "08:00", "end": "18:00", "dow": [1, 2, 3]}, {"start": "10:00", "end": "16:00", "dow": [4, 5]}], "weekNumbersWithinDays": true}\'></div>...'
 
+    >>> props.calendar_header = None
+    >>> props.calendar_footer = None
     >>> props.calendar_first_day = None
+    >>> props.calendar_weekends = None
+    >>> props.calendar_week_numbers = None
+    >>> props.calendar_week_numbers_within_days = None
+    >>> props.calendar_business_hours = None
 
 Cleanup::
 

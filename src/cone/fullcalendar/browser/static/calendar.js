@@ -10,23 +10,9 @@
 
     var calendar = {
 
-        option_mapping: {
-            calendar_header: 'header',
-            calendar_footer: 'footer',
-            calendar_first_day: 'firstDay'
-        },
-
         binder: function(context) {
             var elem = $('#calendar', context);
-            var options = {};
-            var server_options = elem.data('calendar_options');
-            var name, value;
-            for (name in server_options) {
-                value = server_options[name];
-                if (typeof(value) !== 'undefined') {
-                    options[this.option_mapping[name]] = value;
-                }
-            }
+            var options = elem.data('calendar_options');
             elem.fullCalendar(options);
         }
 
