@@ -5,6 +5,7 @@ from cone.tile import tile
 from pyramid.i18n import TranslationStringFactory
 from pyramid.i18n import get_localizer
 from pyramid.view import view_config
+import json
 
 
 _ = TranslationStringFactory('cone.fullcalendar')
@@ -14,6 +15,11 @@ _ = TranslationStringFactory('cone.fullcalendar')
 class FullCalendarTile(Tile):
     """
     """
+
+    @property
+    def header(self):
+        header = self.model.properties.calendar_header
+        return json.dumps(header) if header else None
 
 
 @view_config('calendar', permission='view')

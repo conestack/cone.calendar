@@ -10,9 +10,13 @@
     calendar = {
 
         binder: function(context) {
-
-            $('#calendar').fullCalendar({
-            });
+            var calendar_elem = $('#calendar', context);
+            var options = {};
+            var header = calendar_elem.data('calendar_header');
+            if (header) {
+                options.header = header;
+            }
+            calendar_elem.fullCalendar(options);
         
         }
     };

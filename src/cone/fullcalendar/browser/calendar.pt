@@ -4,6 +4,7 @@
            i18n:domain="cone.fullcalendar"
            omit-tag="True">
 
-  <div id="calendar"></div>
+  <div id="calendar"
+       data-calendar_header='${context.header}'></div>
 
 </tal:block>
