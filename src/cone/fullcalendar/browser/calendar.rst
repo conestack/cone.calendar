@@ -55,12 +55,13 @@ Test calendar options property::
 
     >>> render_tile(model, request, 'calendar')
     u'...<div id="calendar"\n
-    data-calendar_options=\'{"footer": {"right": "today prev,next", "center": "", "left": "title"},
-    "weekends": false, "firstDay": 2,
-    "header": {"right": "today prev,next",
-    "center": "", "left": "title"},
+    data-calendar_options=\'{"businessHours": [{"dow": [1, 2, 3], "end": "18:00", "start": "08:00"}, {"dow": [4, 5], "end": "16:00", "start": "10:00"}],
+    "firstDay": 2,
+    "footer": {"center": "", "left": "title", "right": "today prev,next"},
+    "header": {"center": "", "left": "title", "right": "today prev,next"},
     "weekNumbers": true,
-    "businessHours": [{"start": "08:00", "end": "18:00", "dow": [1, 2, 3]}, {"start": "10:00", "end": "16:00", "dow": [4, 5]}], "weekNumbersWithinDays": true}\'></div>...'
+    "weekNumbersWithinDays": true,
+    "weekends": false}\'></div>...'
 
     >>> props.calendar_header = None
     >>> props.calendar_footer = None

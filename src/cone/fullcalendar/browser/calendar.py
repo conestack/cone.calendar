@@ -34,7 +34,7 @@ class FullCalendarTile(Tile):
             value = getattr(self.model.properties, prop_name)
             if value is not None:
                 options[option_name] = value
-        return json.dumps(options) if options else None
+        return json.dumps(options, sort_keys=True) if options else None
 
 
 @view_config('calendar', permission='view')
