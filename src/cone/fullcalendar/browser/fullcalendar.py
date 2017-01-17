@@ -55,39 +55,41 @@ def fullcalendar(model, request):
     accept='application/json',
     renderer='json',
     permission='view')
-def fc_get_events(model, request):
-    """Return events for fullcalendar.
+class FullCalendarGetEvents(object):
 
-    {
-        'files': [{
-            'pic.jpg': True
-        }]
-    }
-    """
+    def __init__(self, model, request):
+        self.model = model
+        self.request = request
 
-    start = request.params.get('start', None)
-    end = request.params.get('end', None)
-    timezone = request.params.get('timezone', None)
+    def _get_date(self, name):
+        date = self.request.params.get(name, None)
+        date = datetime.datetime.utcfromtimestamp(int(date)) if date else None
 
-    start = datetime.datetime.utcfromtimestamp(int(start)) if start else None
-    end = datetime.datetime.utcfromtimestamp(int(end)) if end else None
+    @property
+    def range_start(self):
+        return self._get_date('start')
 
-    print('start: ' + start.isoformat() if start else '')
-    print('end: ' + end.isoformat() if end else '')
-    print('timezone: ' + timezone or '')
+    @property
+    def range_end(self):
+        return self._get_date('end')
 
-    events = [
-        {
-            'title': 'blah',
-            'start': datetime.datetime.utcnow().isoformat(),
-            'end': (datetime.datetime.utcnow() + datetime.timedelta(1/24.)).isoformat()  # noqa
-        },
-        {
-            'title': 'bluh',
-            'start': (datetime.datetime.utcnow() + datetime.timedelta(1)).isoformat(),  # noqa
-            'end': (datetime.datetime.utcnow() + datetime.timedelta(1) + datetime.timedelta(1/24.)).isoformat()  # noqa
-        }
-    ]
+    @property
+    def timezone(self):
+        return self.request.params.get('timezone', None)
 
-    print events
-    return {'events': events}
+    def __call__(self):
+
+        events = [
+            {
+                'title': 'blah',
+                'start': datetime.datetime.utcnow().isoformat(),
+                'end': (datetime.datetime.utcnow() + datetime.timedelta(1/24.)).isoformat()  # noqa
+            },
+            {
+                'title': 'bluh',
+                'start': (datetime.datetime.utcnow() + datetime.timedelta(1)).isoformat(),  # noqa
+                'end': (datetime.datetime.utcnow() + datetime.timedelta(1) + datetime.timedelta(1/24.)).isoformat()  # noqa
+            }
+        ]
+
+        return {'events': events}
