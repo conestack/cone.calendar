@@ -63,13 +63,13 @@ Test calendar options property::
     "weekNumbersWithinDays": true,
     "weekends": false}\'></div>...'
 
-    >>> props.calendar_header = None
-    >>> props.calendar_footer = None
+    >>> props.calendar_business_hours = None
     >>> props.calendar_first_day = None
-    >>> props.calendar_weekends = None
+    >>> props.calendar_footer = None
+    >>> props.calendar_header = None
     >>> props.calendar_week_numbers = None
     >>> props.calendar_week_numbers_within_days = None
-    >>> props.calendar_business_hours = None
+    >>> props.calendar_weekends = None
 
 Cleanup::
 

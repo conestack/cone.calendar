@@ -5,6 +5,7 @@
            omit-tag="True">
 
   <div id="calendar"
-       data-calendar_options='${context.options}'></div>
+       data-calendar_options='${context.options}'
+       data-calendar_config='${context.config}'></div>
 
 </tal:block>
