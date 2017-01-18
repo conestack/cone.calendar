@@ -13,7 +13,7 @@ optionflags = doctest.NORMALIZE_WHITESPACE | \
 layer = testing.security
 
 TESTFILES = [
-    'browser/calendar.rst',
+    'browser/fullcalendar.rst',
 ]
 
 

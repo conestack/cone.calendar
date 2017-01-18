@@ -13,7 +13,9 @@ Test ``calendar`` tile rendering::
     >>> request = layer.new_request()
     >>> model = BaseNode()
     >>> render_tile(model, request, 'calendar')
-    u'\n\n  <div id="calendar"></div>\n\n\n'
+    u'...<div id="calendar"\n       
+    data-calendar_config=\'{"get_datatype": "json", 
+    "get_url": "@@fc_get_events"}\'></div>...'
 
 Test basic calendar settings::
 
@@ -54,14 +56,18 @@ Test calendar options property::
     ... }]
 
     >>> render_tile(model, request, 'calendar')
-    u'...<div id="calendar"\n
-    data-calendar_options=\'{"businessHours": [{"dow": [1, 2, 3], "end": "18:00", "start": "08:00"}, {"dow": [4, 5], "end": "16:00", "start": "10:00"}],
-    "firstDay": 2,
-    "footer": {"center": "", "left": "title", "right": "today prev,next"},
-    "header": {"center": "", "left": "title", "right": "today prev,next"},
-    "weekNumbers": true,
-    "weekNumbersWithinDays": true,
-    "weekends": false}\'></div>...'
+    u'...<div id="calendar"\n       
+    data-calendar_options=\'{"businessHours": 
+    [{"dow": [1, 2, 3], "end": "18:00", "start": "08:00"}, 
+    {"dow": [4, 5], "end": "16:00", "start": "10:00"}], 
+    "firstDay": 2, 
+    "footer": {"center": "", "left": "title", "right": "today prev,next"}, 
+    "header": {"center": "", "left": "title", "right": "today prev,next"}, 
+    "weekNumbers": true, 
+    "weekNumbersWithinDays": true, 
+    "weekends": false}\'...
+    data-calendar_config=\'{"get_datatype": "json", 
+    "get_url": "@@fc_get_events"}\'></div>...'
 
     >>> props.calendar_business_hours = None
     >>> props.calendar_first_day = None
