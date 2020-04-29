@@ -20,9 +20,12 @@
                 event_sources.push(new calendar.EventSource(opts));
             }
             $.extend(options, {
-                eventSources: event_sources
+                eventSources: event_sources,
+                eventClick: calendar.event_clicked,
+                dayClick: calendar.day_clicked,
+                eventDrop: calendar.event_drop,
+                eventResize: calendar.event_resize
             });
-            console.log(options);
             this.elem.fullCalendar(options);
         },
 
@@ -46,6 +49,28 @@
                 });
             };
         },
+
+        event_clicked: function(cal_evt, js_evt, view) {
+            console.log(cal_evt);
+            console.log(js_evt);
+            console.log(view);
+        },
+
+        day_clicked: function(date, js_evt, view) {
+            console.log(date);
+            console.log(js_evt);
+            console.log(view);
+        },
+
+        event_drop: function(cal_evt, delta, revert_func) {
+            console.log(cal_evt);
+            console.log(delta);
+        },
+
+        event_resize: function(cal_evt, delta, revert_func) {
+            console.log(cal_evt);
+            console.log(delta);
+        }
     };
 
 })(jQuery, bdajax);
