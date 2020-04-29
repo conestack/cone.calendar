@@ -3,6 +3,8 @@ from cone.app.model import BaseNode
 from cone.app.model import Properties
 from cone.tile import render_tile
 from cone.tile.tests import TileTestCase
+import sys
+import unittest
 
 
 class CalendarLayer(testing.Security):
@@ -97,3 +99,19 @@ class TestCalendar(TileTestCase):
 
         self.check_output("""
         """, rendered)
+
+
+def run_tests():
+    from cone.calendar import tests
+    from zope.testrunner.runner import Runner
+
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.findTestCases(tests))
+
+    runner = Runner(found_suites=[suite])
+    runner.run()
+    sys.exit(int(runner.failed))
+
+
+if __name__ == '__main__':
+    run_tests()
