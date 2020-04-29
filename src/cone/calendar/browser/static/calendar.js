@@ -10,23 +10,27 @@
 
         binder: function(context) {
             this.elem = $('#calendar', context);
+            var target = this.elem.data('calendar_target');
             var options = this.elem.data('calendar_options');
             var sources = this.elem.data('calendar_sources');
             var event_sources = [];
             for (var i in sources) {
-                event_sources.push(new calendar.EventSource(sources[i]));
+                var opts = sources[i];
+                opts.target = target;
+                event_sources.push(new calendar.EventSource(opts));
             }
             $.extend(options, {
                 eventSources: event_sources
             });
+            console.log(options);
             this.elem.fullCalendar(options);
         },
 
-        EventSource: function(options) {
-            $.extend(this, options);
+        EventSource: function(opts) {
+            $.extend(this, opts);
             this.events = function(start, end, timezone, callback) {
                 bdajax.request({
-                    url: options.events,
+                    url: opts.target + '/' + opts.events,
                     type: 'json',
                     params: {
                         start: start.unix(),
