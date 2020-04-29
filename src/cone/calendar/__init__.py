@@ -1,38 +1,31 @@
-import cone.app
+from cone.app import cfg
+from cone.app import main_hook
+from cone.calendar.browser import static_resources
 import logging
-import os
 
 
 logger = logging.getLogger('cone.calendar')
 
 
-# protected CSS
-css = cone.app.cfg.css
-css.protected.append('calendar-static/fullcalendar/fullcalendar.min.css')
-css.protected.append('calendar-static/fullcalendar/fullcalendar.print.css')
-css.protected.append('calendar-static/calendar.css')
+@main_hook
+def initialize_calendar(config, global_config, settings):
+    # application startup initialization
 
+    # protected CSS
+    cfg.css.protected.append('calendar-static/fullcalendar/fullcalendar.min.css')
+    cfg.css.protected.append('calendar-static/fullcalendar/fullcalendar.print.css')
+    cfg.css.protected.append('calendar-static/calendar.css')
 
-# protected JS
-js = cone.app.cfg.js
-js.protected.append('calendar-static/moment/moment.min.js')
-js.protected.append('calendar-static/fullcalendar/fullcalendar.min.js')
-js.protected.append('calendar-static/calendar.js')
+    # protected JS
+    cfg.js.protected.append('calendar-static/moment/moment.min.js')
+    cfg.js.protected.append('calendar-static/fullcalendar/fullcalendar.min.js')
+    cfg.js.protected.append('calendar-static/calendar.js')
 
-
-# application startup initialization
-def initialize_calendar(config, global_config, local_config):
     # add translation
     config.add_translation_dirs('cone.calendar:locale/')
 
     # static resources
-    config.add_view(
-        'cone.calendar.browser.static_resources',
-        name='calendar-static'
-    )
+    config.add_view(static_resources, name='calendar-static')
 
     # scan browser package
     config.scan('cone.calendar.browser')
-
-
-cone.app.register_main_hook(initialize_calendar)

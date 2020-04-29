@@ -1,12 +1,27 @@
 from setuptools import find_packages
 from setuptools import setup
+from setuptools.command.test import test
 import os
 
 
+def read_file(name):
+    with open(os.path.join(os.path.dirname(__file__), name)) as f:
+        return f.read()
+
+
 version = '0.1.dev0'
-shortdesc = 'calendar integration for cone.app'
-longdesc = open(os.path.join(os.path.dirname(__file__), 'README.rst')).read()
-longdesc += open(os.path.join(os.path.dirname(__file__), 'LICENSE.rst')).read()
+shortdesc = 'jQuery Fullcalendar integration for cone.app'
+longdesc = '\n\n'.join([read_file(name) for name in [
+    'README.rst',
+    'LICENSE.rst'
+]])
+
+
+class Test(test):
+
+    def run_tests(self):
+        from cone.calendar import tests
+        tests.run_tests()
 
 
 setup(
@@ -33,19 +48,7 @@ setup(
         'setuptools',
         'cone.app',
     ],
-    extras_require = dict(
-        test=[
-            'interlude',
-            'plone.testing',
-            'unittest2',
-        ],
-    ),
-    tests_require=[
-        'interlude',
-        'plone.testing',
-        'unittest2',
-    ],
-    test_suite = "cone.calendar.tests.test_suite",
-    entry_points="""\
-    """
+    extras_require=dict(test=['zope.testrunner']),
+    tests_require=['zope.testrunner'],
+    cmdclass=dict(test=Test)
 )

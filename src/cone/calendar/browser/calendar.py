@@ -1,11 +1,8 @@
 from cone.app.browser import render_main_template
-from cone.app.browser.utils import make_url
 from cone.tile import Tile
 from cone.tile import tile
 from pyramid.i18n import TranslationStringFactory
-from pyramid.i18n import get_localizer
 from pyramid.view import view_config
-
 import datetime
 import json
 
@@ -13,7 +10,7 @@ import json
 _ = TranslationStringFactory('cone.calendar')
 
 
-@tile('calendar', 'calendar.pt', permission='view')
+@tile(name='calendar', path='calendar.pt', permission='view')
 class FullCalendarTile(Tile):
 
     option_mapping = {
@@ -43,7 +40,7 @@ class FullCalendarTile(Tile):
         }, sort_keys=True)
 
 
-@view_config('calendar', permission='view')
+@view_config(name='calendar', permission='view')
 def calendar(model, request):
     """Calendar as traversable view.
     """
@@ -78,18 +75,16 @@ class FullCalendarGetEvents(object):
         return self.request.params.get('timezone', None)
 
     def __call__(self):
-
         events = [
             {
-                'title': 'blah',
+                'title': 'foo',
                 'start': datetime.datetime.utcnow().isoformat(),
-                'end': (datetime.datetime.utcnow() + datetime.timedelta(1/24.)).isoformat()  # noqa
+                'end': (datetime.datetime.utcnow() + datetime.timedelta(1 / 24.)).isoformat()
             },
             {
-                'title': 'bluh',
-                'start': (datetime.datetime.utcnow() + datetime.timedelta(1)).isoformat(),  # noqa
-                'end': (datetime.datetime.utcnow() + datetime.timedelta(1) + datetime.timedelta(1/24.)).isoformat()  # noqa
+                'title': 'bar',
+                'start': (datetime.datetime.utcnow() + datetime.timedelta(1)).isoformat(),
+                'end': (datetime.datetime.utcnow() + datetime.timedelta(1) + datetime.timedelta(1 / 24.)).isoformat()
             }
         ]
-
         return {'events': events}

@@ -1,10 +1,11 @@
 cone.calendar
 =============
 
-This package integrates jQuery Fullcalendar
-(https://github.com/fullcalendar/fullcalendar) in cone.
+This package provides a calendar integration in to cone.app.
+It utilizes jQuery Fullcalendar
+(https://github.com/fullcalendar/fullcalendar).
 
-Currently, tag XXX is included. See
+Currently, tag 3.1.0 is included. See
 (https://github.com/fullcalendar/fullcalendar/releases).
 
 
