@@ -13,7 +13,8 @@ def initialize_calendar(config, global_config, settings):
 
     # protected CSS
     cfg.css.protected.append('calendar-static/fullcalendar/fullcalendar.min.css')
-    cfg.css.protected.append('calendar-static/fullcalendar/fullcalendar.print.css')
+    # XXX: print CSS needs to be delivered dynamically in dedicated print view
+    # cfg.css.protected.append('calendar-static/fullcalendar/fullcalendar.print.css')
     cfg.css.protected.append('calendar-static/calendar.css')
 
     # protected JS

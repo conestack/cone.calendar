@@ -1,4 +1,4 @@
-/*globals jQuery, bdajax*/
+/* globals jQuery, bdajax */
 (function($, bdajax) {
 
     $(document).ready(function() {
@@ -6,55 +6,42 @@
     });
 
     var calendar = {
-
-        elem: undefined,
+        elem: null,
 
         binder: function(context) {
             this.elem = $('#calendar', context);
             var options = this.elem.data('calendar_options');
-            options = $.extend({}, options || {}, {
-                events: this.events
+            var sources = this.elem.data('calendar_sources');
+            var event_sources = [];
+            for (var i in sources) {
+                event_sources.push(new calendar.EventSource(sources[i]));
+            }
+            $.extend(options, {
+                eventSources: event_sources
             });
-
             this.elem.fullCalendar(options);
         },
 
-        events: function(start, end, timezone, callback) {
-            // ``this`` is bound to the FC object.
-            var config = calendar.elem.data('calendar_config');
-            if (!config || !config.get_url) {
-                return;
-            }
-
-            bdajax.request({
-                url: config.get_url,
-                type: config.get_datatype || 'json',
-                params: {
-                    start: start.unix(),
-                    end: end.unix(),
-                    timezone: timezone
-                },
-                success: function(data) {
-                    var events = [];
-
-                    for (var idx in data.events) {
-                        var event = data.events[idx];
-                        events.push({
-                            title: event.title,
-                            start: event.start,
-                            end: event.end
-                        });
+        EventSource: function(options) {
+            $.extend(this, options);
+            this.events = function(start, end, timezone, callback) {
+                bdajax.request({
+                    url: options.events,
+                    type: 'json',
+                    params: {
+                        start: start.unix(),
+                        end: end.unix(),
+                        timezone: timezone
+                    },
+                    success: function(data) {
+                        callback(data);
+                    },
+                    error: function() {
+                        bdajax.error('Failed to request events');
                     }
-
-                    callback(events);
-                },
-                error: function() {
-                    bdajax.error('Request failed');
-                }
-            });
-
+                });
+            };
         },
-
     };
 
 })(jQuery, bdajax);

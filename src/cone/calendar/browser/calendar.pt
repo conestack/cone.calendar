@@ -6,6 +6,6 @@
 
   <div id="calendar"
        data-calendar_options='${context.options}'
-       data-calendar_config='${context.config}'></div>
+       data-calendar_sources='${context.sources}'></div>
 
 </tal:block>

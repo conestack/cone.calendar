@@ -32,8 +32,8 @@ class TestCalendar(TileTestCase):
             request = self.layer.new_request()
             model = BaseNode()
             rendered = render_tile(model, request, 'calendar')
-        self.check_output("""
-        ...<div id="calendar"\n
+        self.checkOutput("""
+        ...<div id="calendar"
         data-calendar_config=\'{"get_datatype": "json",
         "get_url": "@@fc_get_events"}\'></div>...
         """, rendered)
@@ -70,19 +70,16 @@ class TestCalendar(TileTestCase):
             request = self.layer.new_request()
             rendered = render_tile(model, request, 'calendar')
 
-        self.check_output("""
-        ...<div id="calendar"\n
-        data-calendar_options=\'{"businessHours":
-        [{"dow": [1, 2, 3], "end": "18:00", "start": "08:00"},
-        {"dow": [4, 5], "end": "16:00", "start": "10:00"}],
-        "firstDay": 2,
-        "footer": {"center": "", "left": "title", "right": "today prev,next"},
-        "header": {"center": "", "left": "title", "right": "today prev,next"},
-        "weekNumbers": true,
-        "weekNumbersWithinDays": true,
-        "weekends": false}\'...
-        data-calendar_config=\'{"get_datatype": "json",
-        "get_url": "@@fc_get_events"}\'></div>...'
+        self.checkOutput("""
+        <div id="calendar"
+           data-calendar_options='{"businessHours":
+           [{"dow": [1, 2, 3], "end": "18:00", "start": "08:00"},
+           {"dow": [4, 5], "end": "16:00", "start": "10:00"}],
+           "firstDay": 2,
+           "footer": {"center": "", "left": "title", "right": "today prev,next"},
+           "header": {"center": "", "left": "title", "right": "today prev,next"},
+           "weekNumbers": true, "weekNumbersWithinDays": true, "weekends": false}'
+           data-calendar_config='{"get_datatype": "json", "get_url": "calendar_events"}'></div>
         """, rendered)
 
         props.calendar_header = None
@@ -97,7 +94,9 @@ class TestCalendar(TileTestCase):
             request = self.layer.new_request()
             rendered = render_tile(model, request, 'calendar')
 
-        self.check_output("""
+        self.checkOutput("""
+        <div id="calendar"
+           data-calendar_config='{"get_datatype": "json", "get_url": "calendar_events"}'></div>
         """, rendered)
 
 

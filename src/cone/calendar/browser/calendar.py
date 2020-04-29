@@ -1,18 +1,75 @@
 from cone.app.browser import render_main_template
 from cone.tile import Tile
 from cone.tile import tile
+from datetime import datetime
 from pyramid.i18n import TranslationStringFactory
 from pyramid.view import view_config
-import datetime
 import json
+import logging
 
 
+logger = logging.getLogger('cone.calendar')
 _ = TranslationStringFactory('cone.calendar')
 
 
 @tile(name='calendar', path='calendar.pt', permission='view')
-class FullCalendarTile(Tile):
+class CalendarTile(Tile):
+    """Tile rendering the fullcalendar widget.
 
+    Reference: https://fullcalendar.io/docs/v3
+
+    Configuration of the calendar is done via ``model.properties`` object.
+
+    Available config options:
+
+    ``calendar_header``:
+        Corresponds to ``header`` option passed to fullcalendar.
+
+        See https://fullcalendar.io/docs/v3/header
+
+    ``calendar_footer``:
+        Corresponds to ``footer`` option passed to fullcalendar.
+
+        See https://fullcalendar.io/docs/v3/footer
+
+    ``calendar_first_day``:
+        Corresponds to ``firstDay`` option passed to fullcalendar.
+
+        See https://fullcalendar.io/docs/v3/firstDay
+
+    ``calendar_weekends``:
+        Corresponds to ``weekends`` option passed to fullcalendar.
+
+        See https://fullcalendar.io/docs/v3/weekends
+
+    ``calendar_week_numbers``:
+        Corresponds to ``weekNumbers`` option passed to fullcalendar.
+
+        See https://fullcalendar.io/docs/v3/weekNumbers
+
+    ``calendar_week_numbers_within_days``:
+        Corresponds to ``weekNumbersWithinDays`` option passed to fullcalendar.
+
+        See https://fullcalendar.io/docs/v3/weekNumbersWithinDays
+
+    ``calendar_business_hours``:
+        Corresponds to ``businessHours`` option passed to fullcalendar.
+
+        See https://fullcalendar.io/docs/v3/businessHours
+
+    ``calendar_event_sources``:
+        A list of dictionaries containing event source configurations.
+
+        See https://fullcalendar.io/docs/v3/event-source-object
+
+        As ``events`` attribute, a JSON view name is expected. On the client
+        side a callback handler gets created using this view name for fetching
+        event data. The base class for implementing JSON event data is
+        ``CalendarEvents``.
+
+        If ``calendar_event_sources`` is not defined on model properties,
+        ``CalendarTile.default_event_sources`` is used.
+    """
     option_mapping = {
         'calendar_header': 'header',
         'calendar_footer': 'footer',
@@ -20,8 +77,12 @@ class FullCalendarTile(Tile):
         'calendar_weekends': 'weekends',
         'calendar_week_numbers': 'weekNumbers',
         'calendar_week_numbers_within_days': 'weekNumbersWithinDays',
-        'calendar_business_hours': 'businessHours',
+        'calendar_business_hours': 'businessHours'
     }
+    default_event_sources = [{
+        'events': 'calendar_events',
+        'color': 'red'
+    }]
 
     @property
     def options(self):
@@ -33,58 +94,93 @@ class FullCalendarTile(Tile):
         return json.dumps(options, sort_keys=True) if options else None
 
     @property
-    def config(self):
-        return json.dumps({
-            'get_url': '@@fc_get_events',
-            'get_datatype': 'json'
-        }, sort_keys=True)
+    def sources(self):
+        sources = self.model.properties.calendar_event_sources
+        if not sources:
+            sources = self.default_event_sources
+        return json.dumps(sources)
 
 
 @view_config(name='calendar', permission='view')
 def calendar(model, request):
-    """Calendar as traversable view.
+    """Traversable view rendering the ``calendar`` tile to content area.
     """
     return render_main_template(model, request, 'calendar')
 
 
 @view_config(
-    name='fc_get_events',
+    name='calendar_events',
     accept='application/json',
     renderer='json',
     permission='view')
-class FullCalendarGetEvents(object):
+class CalendarEvents(object):
+    """Abstract JSON event data view for fullcalendar.
+
+    Concrete even data providers must derive from this object and implement
+    ``events`` function.
+    """
 
     def __init__(self, model, request):
         self.model = model
         self.request = request
 
-    def _get_date(self, name):
-        date = self.request.params.get(name, None)
-        date = datetime.datetime.utcfromtimestamp(int(date)) if date else None
+    def parse_date(self, val):
+        """Parse datetime from value received from fullcalendar.
+        """
+        return datetime.utcfromtimestamp(int(val))
+
+    def format_date(self, dt):
+        """Format datetime suitable for fullcalendar.
+        """
+        return dt.isoformat()
 
     @property
     def range_start(self):
-        return self._get_date('start')
+        """Event range start as datetime.
+        """
+        start = self.request.params.get('start')
+        return self.parse_date(start)
 
     @property
     def range_end(self):
-        return self._get_date('end')
+        """Event range end as datetime.
+        """
+        end = self.request.params.get('end')
+        return self.parse_date(end)
 
     @property
     def timezone(self):
-        return self.request.params.get('timezone', None)
+        """Event range timezone.
+        """
+        return self.request.params.get('timezone')
+
+    def events(self, start, end, timezone):
+        """Return events for requested range and timezone.
+
+        Return format:
+
+        [{
+            'id': uuid.UUID
+            'title': 'Event Title',
+            'start': datetime.datetime,
+            'end': datetime.datetime,
+        }]
+
+        For a full list of event attributes see
+        https://fullcalendar.io/docs/v3/event-object
+        """
+        raise NotImplementedError(
+            'Abstract CalendarEvents does not implement ``events``'
+        )
 
     def __call__(self):
-        events = [
-            {
-                'title': 'foo',
-                'start': datetime.datetime.utcnow().isoformat(),
-                'end': (datetime.datetime.utcnow() + datetime.timedelta(1 / 24.)).isoformat()
-            },
-            {
-                'title': 'bar',
-                'start': (datetime.datetime.utcnow() + datetime.timedelta(1)).isoformat(),
-                'end': (datetime.datetime.utcnow() + datetime.timedelta(1) + datetime.timedelta(1 / 24.)).isoformat()
-            }
-        ]
-        return {'events': events}
+        try:
+            events = self.events(self.range_start, self.range_end, self.timezone)
+            for event in events:
+                event['id'] = str(event['id'])
+                event['start'] = self.format_date(event['start'])
+                event['end'] = self.format_date(event['end'])
+            return events
+        except Exception as e:
+            logger.exception(e)
+            return []

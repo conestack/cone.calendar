@@ -1,3 +1,5 @@
+from calendar import CalendarEvents  # noqa
+from calendar import CalendarTile  # noqa
 from pyramid.static import static_view
 
 
