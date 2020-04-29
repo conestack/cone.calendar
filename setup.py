@@ -4,13 +4,13 @@ import os
 
 
 version = '0.1.dev0'
-shortdesc = 'jQuery Fullcalendar integration for cone.app'
+shortdesc = 'calendar integration for cone.app'
 longdesc = open(os.path.join(os.path.dirname(__file__), 'README.rst')).read()
 longdesc += open(os.path.join(os.path.dirname(__file__), 'LICENSE.rst')).read()
 
 
 setup(
-    name='cone.fullcalendar',
+    name='cone.calendar',
     version=version,
     description=shortdesc,
     long_description=longdesc,
@@ -22,7 +22,7 @@ setup(
     keywords='node pyramid cone web',
     author='BlueDynamics Alliance',
     author_email='dev@bluedynamics.com',
-    url=u'https://github.com/bluedynamics/cone.fullcalendar',
+    url=u'https://github.com/bluedynamics/cone.calendar',
     license='Simplified BSD',
     packages=find_packages('src'),
     package_dir={'': 'src'},
@@ -45,7 +45,7 @@ setup(
         'plone.testing',
         'unittest2',
     ],
-    test_suite = "cone.fullcalendar.tests.test_suite",
+    test_suite = "cone.calendar.tests.test_suite",
     entry_points="""\
     """
 )

@@ -10,10 +10,10 @@ import datetime
 import json
 
 
-_ = TranslationStringFactory('cone.fullcalendar')
+_ = TranslationStringFactory('cone.calendar')
 
 
-@tile('calendar', 'fullcalendar.pt', permission='view')
+@tile('calendar', 'calendar.pt', permission='view')
 class FullCalendarTile(Tile):
 
     option_mapping = {
@@ -44,7 +44,7 @@ class FullCalendarTile(Tile):
 
 
 @view_config('calendar', permission='view')
-def fullcalendar(model, request):
+def calendar(model, request):
     """Calendar as traversable view.
     """
     return render_main_template(model, request, 'calendar')

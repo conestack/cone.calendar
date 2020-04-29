@@ -1,5 +1,5 @@
-cone.fullcalendar
-=================
+cone.calendar
+=============
 
 This package integrates jQuery Fullcalendar
 (https://github.com/fullcalendar/fullcalendar) in cone.

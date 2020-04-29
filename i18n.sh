@@ -6,9 +6,9 @@
 #         ./i18n.sh
 
 # configuration
-DOMAIN="cone.fullcalendar"
-SEARCH_PATH="src/cone/fullcalendar"
-LOCALES_PATH="src/cone/fullcalendar/locale"
+DOMAIN="cone.calendar"
+SEARCH_PATH="src/cone/calendar"
+LOCALES_PATH="src/cone/calendar/locale"
 # end configuration
 
 # create locales folder if not exists

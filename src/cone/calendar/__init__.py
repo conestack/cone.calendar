@@ -3,7 +3,7 @@ import logging
 import os
 
 
-logger = logging.getLogger('cone.fullcalendar')
+logger = logging.getLogger('cone.calendar')
 
 
 # protected CSS
@@ -21,18 +21,18 @@ js.protected.append('calendar-static/calendar.js')
 
 
 # application startup initialization
-def initialize_fullcalendar(config, global_config, local_config):
+def initialize_calendar(config, global_config, local_config):
     # add translation
-    config.add_translation_dirs('cone.fullcalendar:locale/')
+    config.add_translation_dirs('cone.calendar:locale/')
 
     # static resources
     config.add_view(
-        'cone.fullcalendar.browser.static_resources',
+        'cone.calendar.browser.static_resources',
         name='calendar-static'
     )
 
     # scan browser package
-    config.scan('cone.fullcalendar.browser')
+    config.scan('cone.calendar.browser')
 
 
-cone.app.register_main_hook(initialize_fullcalendar)
+cone.app.register_main_hook(initialize_calendar)
