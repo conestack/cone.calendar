@@ -47,6 +47,7 @@ setup(
     install_requires=[
         'setuptools',
         'cone.app',
+        'yafowil.widget.cron'
     ],
     extras_require=dict(test=['zope.testrunner']),
     tests_require=['zope.testrunner'],
