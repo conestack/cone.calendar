@@ -12,6 +12,18 @@ logger = logging.getLogger('cone.calendar')
 _ = TranslationStringFactory('cone.calendar')
 
 
+def parse_date(seconds):
+    """Parse datetime from value received from fullcalendar.
+    """
+    return datetime.utcfromtimestamp(int(seconds))
+
+
+def format_date(dt):
+    """Format datetime suitable for fullcalendar.
+    """
+    return dt.isoformat()
+
+
 @tile(name='calendar', path='calendar.pt', permission='view')
 class CalendarTile(Tile):
     """Tile rendering the fullcalendar widget.
@@ -73,6 +85,9 @@ class CalendarTile(Tile):
         attribute of event data.
 
         See ``CalendarEvents.events`` documentation for details.
+
+        As default target the calendar context target is used if not defined
+        explicitely on actions.
 
         If ``calendar_actions`` is not defined on model properties,
         ``CalendarTile.default_actions`` is used.
@@ -158,29 +173,19 @@ class CalendarEvents(object):
         self.model = model
         self.request = request
 
-    def parse_date(self, val):
-        """Parse datetime from value received from fullcalendar.
-        """
-        return datetime.utcfromtimestamp(int(val))
-
-    def format_date(self, dt):
-        """Format datetime suitable for fullcalendar.
-        """
-        return dt.isoformat()
-
     @property
     def range_start(self):
         """Event range start as datetime.
         """
         start = self.request.params.get('start')
-        return self.parse_date(start)
+        return parse_date(start)
 
     @property
     def range_end(self):
         """Event range end as datetime.
         """
         end = self.request.params.get('end')
-        return self.parse_date(end)
+        return parse_date(end)
 
     @property
     def timezone(self):
@@ -198,10 +203,11 @@ class CalendarEvents(object):
             'title': 'Event Title',
             'start': datetime.datetime,
             'end': datetime.datetime,
+            'target': 'https://example.com/path/to/event',
             'actions': [{
                 'title': 'Edit',
                 'icon': 'glyphicons glyphicons-pencil',
-                'target': 'https://example.com/path/to/event',
+                'target': 'https://example.com/path/to/event?param=value',
                 'overlay': {
                     'action': 'overlayedit',
                     'css': 'overlay-form'
@@ -209,7 +215,6 @@ class CalendarEvents(object):
             }, {
                 'title': 'Delete',
                 'icon': 'glyphicons glyphicons-remove-circle',
-                'target': 'https://example.com/path/to/event',
                 'confirm': 'Do you really want to delete this event?',
                 'action': {
                     'name': 'delete',
@@ -222,8 +227,15 @@ class CalendarEvents(object):
         For a full list of fullcalendar event attributes see
         https://fullcalendar.io/docs/v3/event-object
 
-        The ``actions`` attribute is cone specific and defines a list of actions
-        available for the specific event.
+        The ``actions`` and ``target`` attributes are cone specific.
+
+        ``target`` defines the default target where actions get executed.
+        Target can be overwritten by specific actions. Target represents the URL of
+        the event without trailing view name and may contain a query string.
+        Target is mandatory if event is editable or actions are defined which
+        do not provide a target on their own.
+
+        ``actions`` defines a list of actions available for the specific event.
 
         If one action is specified, it gets executed directly when event gets
         clicked.
@@ -237,10 +249,12 @@ class CalendarEvents(object):
             The action title as string.
 
         ``icon``
-            Icon CSS class.
+            Icon CSS class. Optional.
 
         ``target``
-            Target on which the action gets executed.
+            Target on which the action gets executed. Target represents the URL
+            of the event without trailing view name and may contain a query
+            string. Optional, if skipped the default target is used.
 
         ``action``
             bdajax action definitions as dict containing:
@@ -251,6 +265,9 @@ class CalendarEvents(object):
                 'mode': 'replace'
             }
 
+            At least one option out of ``action``, ``event`` or ``overlay`` must
+            be defined. An arbitrary combination is possible.
+
         ``event``
             bdajax event definitions as dict containing:
 
@@ -258,6 +275,9 @@ class CalendarEvents(object):
                 'name': 'eventname',
                 'selector': '.some_selector'
             }
+
+            At least one option out of ``action``, ``event`` or ``overlay`` must
+            be defined. An arbitrary combination is possible.
 
         ``overlay``
             bdajax overlay definitions as dict containing:
@@ -267,8 +287,11 @@ class CalendarEvents(object):
                 'css': 'overlay CSS class'
             }
 
+            At least one option out of ``action``, ``event`` or ``overlay`` must
+            be defined. An arbitrary combination is possible.
+
         ``confirm``
-            Confirmation message as string.
+            Confirmation message as string. Optional.
         """
         raise NotImplementedError(
             'Abstract CalendarEvents does not implement ``events``'
@@ -279,8 +302,8 @@ class CalendarEvents(object):
             events = self.events(self.range_start, self.range_end, self.timezone)
             for event in events:
                 event['id'] = str(event['id'])
-                event['start'] = self.format_date(event['start'])
-                event['end'] = self.format_date(event['end'])
+                event['start'] = format_date(event['start'])
+                event['end'] = format_date(event['end'])
             return events
         except Exception as e:
             logger.exception(e)

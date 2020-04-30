@@ -7,6 +7,7 @@
 
     var calendar = {
         elem: null,
+        target: null,
         actions: null,
 
         binder: function(context) {
@@ -14,20 +15,13 @@
             if (!elem.length) {
                 return;
             }
-            var target = elem.data('calendar_target');
-            var actions = elem.data('calendar_actions');
-            for (var i in actions) {
-                var action = actions[i];
-                if (!action.target) {
-                    action.target = target;
-                }
-            }
+            this.elem = elem;
+            this.target = elem.data('calendar_target');
+            this.actions = elem.data('calendar_actions');
             var sources = elem.data('calendar_sources');
             var event_sources = [];
             for (var i in sources) {
-                var opts = sources[i];
-                opts.target = target;
-                event_sources.push(new calendar.EventSource(opts));
+                event_sources.push(new calendar.EventSource(sources[i]));
             }
             var options = elem.data('calendar_options');
             $.extend(options, {
@@ -37,8 +31,6 @@
                 eventDrop: calendar.event_drop,
                 eventResize: calendar.event_resize
             });
-            this.elem = elem;
-            this.actions = actions;
             elem.fullCalendar(options);
         },
 
@@ -46,7 +38,7 @@
             $.extend(this, opts);
             this.events = function(start, end, timezone, callback) {
                 bdajax.request({
-                    url: opts.target + '/' + opts.events,
+                    url: calendar.target + '/' + opts.events,
                     type: 'json',
                     params: {
                         start: start.unix(),
@@ -141,23 +133,33 @@
             }
         },
 
-        handle_actions: function(actions, params, x, y) {
+        handle_actions: function(actions, target, params, x, y) {
             if (!actions) {
                 return;
             }
+            // get a deepcopy of given actions
             actions = JSON.parse(JSON.stringify(actions));
+            // adopt action data
             for (var i in actions) {
                 var action = actions[i];
+                // set default target if no target defined on action
+                if (!action.target) {
+                    action.target = target;
+                }
+                // parse target if defined as string
                 if (!action.target.url) {
                     action.target = bdajax.parsetarget(action.target);
                 }
+                // extend query params by additional params
                 $.extend(action.target.params, params);
             }
+            // only one action defined, gets executed direclty
             if (actions.length == 1) {
                 var action = actions[0];
                 this.handle_action(action);
                 return;
             }
+            // more than one action found, display context menu
             this.create_context_menu(actions, x, y);
         },
 
@@ -167,6 +169,7 @@
             };
             calendar.handle_actions(
                 cal_evt.actions,
+                cal_evt.target,
                 params,
                 js_evt.pageX,
                 js_evt.pageY
@@ -180,6 +183,7 @@
             };
             calendar.handle_actions(
                 calendar.actions,
+                calendar.target,
                 params,
                 js_evt.pageX,
                 js_evt.pageY
@@ -187,13 +191,15 @@
         },
 
         event_drop: function(cal_evt, delta, revert_func) {
-            console.log(cal_evt);
-            console.log(delta);
+            console.log(cal_evt.target);
+            console.log(cal_evt.id);
+            console.log(delta.asSeconds());
         },
 
         event_resize: function(cal_evt, delta, revert_func) {
-            console.log(cal_evt);
-            console.log(delta);
+            console.log(cal_evt.target);
+            console.log(cal_evt.id);
+            console.log(delta.asSeconds());
         }
     };
 
