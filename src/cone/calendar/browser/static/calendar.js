@@ -7,18 +7,29 @@
 
     var calendar = {
         elem: null,
+        actions: null,
 
         binder: function(context) {
-            this.elem = $('#calendar', context);
-            var target = this.elem.data('calendar_target');
-            var options = this.elem.data('calendar_options');
-            var sources = this.elem.data('calendar_sources');
+            var elem = $('#calendar', context);
+            if (!elem.length) {
+                return;
+            }
+            var target = elem.data('calendar_target');
+            var actions = elem.data('calendar_actions');
+            for (var i in actions) {
+                var action = actions[i];
+                if (!action.target) {
+                    action.target = target;
+                }
+            }
+            var sources = elem.data('calendar_sources');
             var event_sources = [];
             for (var i in sources) {
                 var opts = sources[i];
                 opts.target = target;
                 event_sources.push(new calendar.EventSource(opts));
             }
+            var options = elem.data('calendar_options');
             $.extend(options, {
                 eventSources: event_sources,
                 eventClick: calendar.event_clicked,
@@ -26,7 +37,9 @@
                 eventDrop: calendar.event_drop,
                 eventResize: calendar.event_resize
             });
-            this.elem.fullCalendar(options);
+            this.elem = elem;
+            this.actions = actions;
+            elem.fullCalendar(options);
         },
 
         EventSource: function(opts) {
@@ -100,13 +113,12 @@
         },
 
         perform_action: function(action) {
-            var target = bdajax.parsetarget(action.target);
+            var target = action.target;
             if (action.action) {
-                var action = action.action;
                 bdajax.action({
-                    name: action.name,
-                    selector: action.selector,
-                    mode: action.mode,
+                    name: action.action.name,
+                    selector: action.action.selector,
+                    mode: action.action.mode,
                     url: target.url,
                     params: target.params
                 });
@@ -129,26 +141,49 @@
             }
         },
 
+        handle_actions: function(actions, params, x, y) {
+            if (!actions) {
+                return;
+            }
+            actions = JSON.parse(JSON.stringify(actions));
+            for (var i in actions) {
+                var action = actions[i];
+                if (!action.target.url) {
+                    action.target = bdajax.parsetarget(action.target);
+                }
+                $.extend(action.target.params, params);
+            }
+            if (actions.length == 1) {
+                var action = actions[0];
+                this.handle_action(action);
+                return;
+            }
+            this.create_context_menu(actions, x, y);
+        },
+
         event_clicked: function(cal_evt, js_evt, view) {
-            if (!cal_evt.actions) {
-                return;
-            }
-            if (cal_evt.actions.length == 1) {
-                var action = cal_evt.actions[0];
-                calendar.handle_action(action);
-                return;
-            }
-            calendar.create_context_menu(
+            var params = {
+                view: view.name
+            };
+            calendar.handle_actions(
                 cal_evt.actions,
+                params,
                 js_evt.pageX,
                 js_evt.pageY
             );
         },
 
         day_clicked: function(date, js_evt, view) {
-            console.log(date);
-            console.log(js_evt);
-            console.log(view);
+            var params = {
+                data: date.unix(),
+                view: view.name
+            };
+            calendar.handle_actions(
+                calendar.actions,
+                params,
+                js_evt.pageX,
+                js_evt.pageY
+            );
         },
 
         event_drop: function(cal_evt, delta, revert_func) {

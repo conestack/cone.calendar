@@ -5,8 +5,9 @@
            omit-tag="True">
 
   <div id="calendar"
-       data-calendar_target='${context.nodeurl}'
+       data-calendar_target='${context.target}'
        data-calendar_options='${context.options}'
-       data-calendar_sources='${context.sources}'></div>
+       data-calendar_sources='${context.sources}'
+       data-calendar_actions='${context.actions}'></div>
 
 </tal:block>

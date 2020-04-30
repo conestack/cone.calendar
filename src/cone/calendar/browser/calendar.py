@@ -66,6 +66,17 @@ class CalendarTile(Tile):
 
         See https://fullcalendar.io/docs/v3/businessHours
 
+    ``calendar_actions``:
+        List of actions for clicking empty day/time in calendar.
+
+        Action definition format and behavior is the same as for the ``actions``
+        attribute of event data.
+
+        See ``CalendarEvents.events`` documentation for details.
+
+        If ``calendar_actions`` is not defined on model properties,
+        ``CalendarTile.default_actions`` is used.
+
     ``calendar_event_sources``:
         A list of dictionaries containing event source configurations.
 
@@ -90,9 +101,15 @@ class CalendarTile(Tile):
         'calendar_business_hours': 'businessHours'
     }
     default_event_sources = [{
-        'events': 'calendar_events',
-        'color': 'red'
+        'events': 'calendar_events'
     }]
+    default_actions = []
+
+    @property
+    def target(self):
+        """Calendar context target. Gets used for querying event sources.
+        """
+        return self.nodeurl
 
     @property
     def options(self):
@@ -109,6 +126,13 @@ class CalendarTile(Tile):
         if not sources:
             sources = self.default_event_sources
         return json.dumps(sources)
+
+    @property
+    def actions(self):
+        actions = self.model.properties.calendar_actions
+        if not actions:
+            actions = self.default_actions
+        return json.dumps(actions)
 
 
 @view_config(name='calendar', permission='view')
