@@ -9,14 +9,13 @@ Currently, tag 3.1.0 is included. See
 (https://github.com/fullcalendar/fullcalendar/releases).
 
 
-Usage
------
+Calendar Widget
+---------------
 
 The calendar widget integration is done via
 ``cone.calendar.browser.CalendarTile`` which is registered by name ``calendar``.
 
-The basic configuration is done via model properties. For details about the
-available configuration options see ``cone.calendar.browser.calendar.CalendarTile``.
+The overall calendar configuration is done via model properties.
 
 .. code-block:: python
 
@@ -36,14 +35,21 @@ available configuration options see ``cone.calendar.browser.calendar.CalendarTil
             }
             return props
 
-For a full list of calendar options read ``cone.calendar.browser.CalendarTile``
-documentation.
+For a full list of available calendar options read
+``cone.calendar.browser.CalendarTile`` documentation.
 
-Concrete even data provider must derive from
-``cone.calendar.browser.CalendarEvents`` and implement ``events`` function.
 
-The default event data provider is expected as JSON view registered by name
-``calendar_events`` for a concrete context.
+Calendar Events
+---------------
+
+In order to display events in the calendar, one or more event data sources
+must be provided.
+
+Concrete event data implementation must derive from
+``cone.calendar.browser.CalendarEvents`` and provide ``events`` function.
+
+The default event data source is expected as JSON view registered by name
+``calendar_events`` for a dedictaed model context.
 
 .. code-block:: python
 
@@ -69,11 +75,10 @@ The default event data provider is expected as JSON view registered by name
             }]
             return events
 
-For a full list of event options read ``cone.calendar.browser.CalendarEvents``
-documentation.
+For a full list of available event options read
+``cone.calendar.browser.CalendarEvents`` documentation.
 
-There may be more than one event data provider for one calendar. Custom providers
-are defined on model properties.
+Multiple event data sources are defined via model properties.
 
 .. code-block:: python
 
@@ -89,17 +94,37 @@ are defined on model properties.
                 'events': 'event_data_2',
                 'color': 'red'
             }]
+            return props
 
-For a full list of event source options read ``cone.calendar.browser.CalendarTile``
-documentation.
+For a full list of available event source options read
+``cone.calendar.browser.CalendarTile`` documentation.
 
 
-TestCoverage
-------------
+Locales
+-------
 
-Summary of the test coverage report::
+The calendar locale can be set via ``calendar_locale`` on model properties.
 
-  XXX
+.. code-block:: python
+
+    class MyCalendar(BaseNode):
+
+        @property
+        def properties(self):
+            props = Properties()
+            props.calendar_locale = 'de'
+            return props
+
+Default calendar locale is ``en``. The desired locales must be delivered to
+the browser in order to work correctly. Locales to deliver are defined in the
+application ini config as comma separated list of locale names.
+
+.. code-block:: ini
+
+    cone.calendar.locales = de,fr
+
+For a complete list of available locales see ``browser/static/fullcalendar/locales``
+folder of this package.
 
 
 Contributors
@@ -115,5 +140,5 @@ Changes
 0.1 (unreleased)
 ----------------
 
-- Make it work
+- Initial.
   [rnix, thet]

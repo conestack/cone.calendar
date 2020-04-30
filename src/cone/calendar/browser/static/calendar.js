@@ -51,6 +51,9 @@
         },
 
         event_clicked: function(cal_evt, js_evt, view) {
+            // cal_evt.editable
+            // cal_evt.id
+            // cal_evt.target
             console.log(cal_evt);
             console.log(js_evt);
             console.log(view);

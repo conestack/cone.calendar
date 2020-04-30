@@ -22,6 +22,15 @@ class CalendarTile(Tile):
 
     Available config options:
 
+    ``calendar_locale``:
+        Corresponds to ``locale`` option passed to fullcalendar.
+
+        See https://fullcalendar.io/docs/v3/locale
+
+        Note: Locale files must be preloaded in order to provide the desored
+        locales. The available locales are configured in the application ini
+        file.
+
     ``calendar_header``:
         Corresponds to ``header`` option passed to fullcalendar.
 
@@ -71,6 +80,7 @@ class CalendarTile(Tile):
         ``CalendarTile.default_event_sources`` is used.
     """
     option_mapping = {
+        'calendar_locale': 'locale',
         'calendar_header': 'header',
         'calendar_footer': 'footer',
         'calendar_first_day': 'firstDay',
@@ -160,13 +170,25 @@ class CalendarEvents(object):
         Return format:
 
         [{
-            'id': uuid.UUID
+            'id': uuid.UUID,
             'title': 'Event Title',
             'start': datetime.datetime,
             'end': datetime.datetime,
+            'actions': [{
+                'title': 'Edit',
+                'target': 'https://example.com/path/to/event',
+                'overlay': 'overlayedit'
+            }, {
+                'title': 'Delete',
+                'target': 'https://example.com/path/to/event',
+                'confirm': 'Do you really want to delete this item?'
+            }]
         }]
 
-        For a full list of event attributes see
+        The ``actions`` attribute is cone specific and defines a list of actions
+        available for the specific event.
+
+        For a full list of fullcalendar event attributes see
         https://fullcalendar.io/docs/v3/event-object
         """
         raise NotImplementedError(

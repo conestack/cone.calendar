@@ -20,6 +20,13 @@ def initialize_calendar(config, global_config, settings):
     # protected JS
     cfg.js.protected.append('calendar-static/moment/moment.min.js')
     cfg.js.protected.append('calendar-static/fullcalendar/fullcalendar.min.js')
+
+    locales = settings.get('cone.calendar.locales')
+    if locales:
+        for locale in [loc.strip() for loc in locales.split(',') if loc]:
+            locale_js = 'calendar-static/fullcalendar/locale/{}.js'.format(locale)
+            cfg.js.protected.append(locale_js)
+
     cfg.js.protected.append('calendar-static/calendar.js')
 
     # add translation
