@@ -80,12 +80,53 @@
             menu_item.on('click', function(e) {
                 e.stopPropagation();
                 wrapper.remove();
-                this.perform_action(action);
+                this.handle_action(action);
             }.bind(this));
         },
 
+        handle_action: function(action) {
+            if (!action.target) {
+                return;
+            }
+            if (action.confirm) {
+                bdajax.dialog({
+                    message: action.confirm
+                }, function(options) {
+                    this.perform_action(action);
+                }.bind(this));
+            } else {
+                this.perform_action(action);
+            }
+        },
+
         perform_action: function(action) {
-            console.log(action);
+            var target = bdajax.parsetarget(action.target);
+            if (action.action) {
+                var action = action.action;
+                bdajax.action({
+                    name: action.name,
+                    selector: action.selector,
+                    mode: action.mode,
+                    url: target.url,
+                    params: target.params
+                });
+            }
+            if (action.event) {
+                var event = action.event;
+                bdajax.trigger(
+                    event.name,
+                    event.selector,
+                    target
+                );
+            }
+            if (action.overlay) {
+                var overlay = action.overlay;
+                bdajax.overlay({
+                    action: overlay.action,
+                    target: target,
+                    css: overlay.css
+                });
+            }
         },
 
         event_clicked: function(cal_evt, js_evt, view) {
@@ -94,7 +135,7 @@
             }
             if (cal_evt.actions.length == 1) {
                 var action = cal_evt.actions[0];
-                calendar.perform_action(action);
+                calendar.handle_action(action);
                 return;
             }
             calendar.create_context_menu(

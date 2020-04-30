@@ -178,20 +178,73 @@ class CalendarEvents(object):
                 'title': 'Edit',
                 'icon': 'glyphicons glyphicons-pencil',
                 'target': 'https://example.com/path/to/event',
-                'overlay': 'overlayedit'
+                'overlay': {
+                    'action': 'overlayedit',
+                    'css': 'overlay-form'
+                }
             }, {
                 'title': 'Delete',
                 'icon': 'glyphicons glyphicons-remove-circle',
                 'target': 'https://example.com/path/to/event',
-                'confirm': 'Do you really want to delete this item?'
+                'confirm': 'Do you really want to delete this event?',
+                'action': {
+                    'name': 'delete',
+                    'selector': 'NONE',
+                    'mode': 'NONE'
+                }
             }]
         }]
+
+        For a full list of fullcalendar event attributes see
+        https://fullcalendar.io/docs/v3/event-object
 
         The ``actions`` attribute is cone specific and defines a list of actions
         available for the specific event.
 
-        For a full list of fullcalendar event attributes see
-        https://fullcalendar.io/docs/v3/event-object
+        If one action is specified, it gets executed directly when event gets
+        clicked.
+
+        If multiple actions are specified, a dropdown menu containing the actions
+        as menu items gets rendered.
+
+        Action options:
+
+        ``title``
+            The action title as string.
+
+        ``icon``
+            Icon CSS class.
+
+        ``target``
+            Target on which the action gets executed.
+
+        ``action``
+            bdajax action definitions as dict containing:
+
+            {
+                'name': 'action_name',
+                'selector': '.some_selector',
+                'mode': 'replace'
+            }
+
+        ``event``
+            bdajax event definitions as dict containing:
+
+            {
+                'name': 'eventname',
+                'selector': '.some_selector'
+            }
+
+        ``overlay``
+            bdajax overlay definitions as dict containing:
+
+            {
+                'action': 'action_name',
+                'css': 'overlay CSS class'
+            }
+
+        ``confirm``
+            Confirmation message as string.
         """
         raise NotImplementedError(
             'Abstract CalendarEvents does not implement ``events``'
