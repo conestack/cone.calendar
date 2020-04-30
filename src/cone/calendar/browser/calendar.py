@@ -157,21 +157,29 @@ def calendar(model, request):
     return render_main_template(model, request, 'calendar')
 
 
+class JSONView(object):
+
+    def __init__(self, model, request):
+        self.model = model
+        self.request = request
+
+    def __call__(self):
+        raise NotImplementedError(
+            'Abstract ``JSONView`` does not implement ``__call__``'
+        )
+
+
 @view_config(
     name='calendar_events',
     accept='application/json',
     renderer='json',
     permission='view')
-class CalendarEvents(object):
+class CalendarEvents(JSONView):
     """Abstract JSON event data view for fullcalendar.
 
     Concrete even data providers must derive from this object and implement
     ``events`` function.
     """
-
-    def __init__(self, model, request):
-        self.model = model
-        self.request = request
 
     @property
     def range_start(self):
@@ -187,14 +195,8 @@ class CalendarEvents(object):
         end = self.request.params.get('end')
         return parse_date(end)
 
-    @property
-    def timezone(self):
-        """Event range timezone.
-        """
-        return self.request.params.get('timezone')
-
-    def events(self, start, end, timezone):
-        """Return events for requested range and timezone.
+    def events(self, start, end):
+        """Return events for requested range.
 
         Return format:
 
@@ -299,7 +301,7 @@ class CalendarEvents(object):
 
     def __call__(self):
         try:
-            events = self.events(self.range_start, self.range_end, self.timezone)
+            events = self.events(self.range_start, self.range_end)
             for event in events:
                 event['id'] = str(event['id'])
                 event['start'] = format_date(event['start'])
@@ -308,3 +310,31 @@ class CalendarEvents(object):
         except Exception as e:
             logger.exception(e)
             return []
+
+
+@view_config(
+    name='calendar_event_drop',
+    # context=IScheduled,
+    accept='application/json',
+    renderer='json',
+    permission='view')
+class CalendarEventDrop(JSONView):
+    """JSON view for modifying event start time.
+    """
+
+    def __call__(self):
+        return 'DROPPED'
+
+
+@view_config(
+    name='calendar_event_resize',
+    # context=IScheduled,
+    accept='application/json',
+    renderer='json',
+    permission='view')
+class CalendarEventResize(JSONView):
+    """JSON view for modifying event duration.
+    """
+
+    def __call__(self):
+        return 'RESIZED'

@@ -66,7 +66,7 @@ The default event data source is expected as JSON view registered by name
         permission='view')
     class MyEvents(CalendarEvents):
 
-        def events(self, start, end, timezone):
+        def events(self, start, end):
             events = [{
                 'id': uuid.uuid4(),
                 'title': 'Title',

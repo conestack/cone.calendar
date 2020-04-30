@@ -42,8 +42,7 @@
                     type: 'json',
                     params: {
                         start: start.unix(),
-                        end: end.unix(),
-                        timezone: timezone
+                        end: end.unix()
                     },
                     success: function(data) {
                         callback(data);
@@ -87,6 +86,16 @@
                 wrapper.remove();
                 this.handle_action(action);
             }.bind(this));
+        },
+
+        prepare_target: function(target, params) {
+            // parse target if defined as string
+            if (!target.url) {
+                target = bdajax.parsetarget(target);
+            }
+            // extend query params by additional params
+            $.extend(target.params, params);
+            return target;
         },
 
         handle_action: function(action) {
@@ -139,19 +148,13 @@
             }
             // get a deepcopy of given actions
             actions = JSON.parse(JSON.stringify(actions));
-            // adopt action data
+            // prepare action target
             for (var i in actions) {
                 var action = actions[i];
-                // set default target if no target defined on action
-                if (!action.target) {
-                    action.target = target;
-                }
-                // parse target if defined as string
-                if (!action.target.url) {
-                    action.target = bdajax.parsetarget(action.target);
-                }
-                // extend query params by additional params
-                $.extend(action.target.params, params);
+                action.target = this.prepare_target(
+                    action.target || target,
+                    params
+                );
             }
             // only one action defined, gets executed direclty
             if (actions.length == 1) {
@@ -190,16 +193,47 @@
             );
         },
 
+        update_event: function(cal_evt, delta, revert_func, view, callback) {
+            var target = this.prepare_target(cal_evt.target, {
+                id: cal_evt.id,
+                start: cal_evt.start.unix(),
+                end: cal_evt.end.unix(),
+                delta: delta.asSeconds()
+            })
+            bdajax.request({
+                url: target.url + '/' + view,
+                type: 'json',
+                params: target.params,
+                success: function(data) {
+                    callback(data);
+                },
+                error: function() {
+                    revert_func();
+                    bdajax.error('Failed to update event');
+                }
+            });
+        },
+
         event_drop: function(cal_evt, delta, revert_func) {
-            console.log(cal_evt.target);
-            console.log(cal_evt.id);
-            console.log(delta.asSeconds());
+            if (!cal_evt.editable && !cal_evt.startEditable) {
+                return;
+            }
+            var view = 'calendar_event_drop'
+            var cb = function(data) {
+                console.log(data);
+            }
+            calendar.update_event(cal_evt, delta, revert_func, view, cb);
         },
 
         event_resize: function(cal_evt, delta, revert_func) {
-            console.log(cal_evt.target);
-            console.log(cal_evt.id);
-            console.log(delta.asSeconds());
+            if (!cal_evt.editable && !cal_evt.durationEditable) {
+                return;
+            }
+            var view = 'calendar_event_resize'
+            var cb = function(data) {
+                console.log(data);
+            }
+            calendar.update_event(cal_evt, delta, revert_func, view, cb);
         }
     };
 
