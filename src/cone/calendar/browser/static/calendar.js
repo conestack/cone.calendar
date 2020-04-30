@@ -50,13 +50,58 @@
             };
         },
 
+        create_context_menu: function(actions, x, y) {
+            var body = $('body', document);
+            var wrapper = $('<div />')
+                .attr('class', 'calendar-contextmenu-wrapper')
+                .css('height', body.height() + 'px');
+            body.append(wrapper);
+            wrapper.on('click contextmenu', function(e) {
+                e.preventDefault();
+                wrapper.remove();
+            });
+            var menu = $('<ul />')
+                .attr('class', 'calendar-contextmenu dropdown-menu')
+                .css('left', x + 'px')
+                .css('top', y + 'px')
+                .css('display', 'block');
+            wrapper.append(menu);
+            for (var i in actions) {
+                this.add_menu_item(wrapper, menu, actions[i]);
+            }
+        },
+
+        add_menu_item: function(wrapper, menu, action) {
+            var menu_item = $('<li><span />' + action.title + '</li>');
+            if (action.icon) {
+                $('span', menu_item).attr('class', action.icon);
+            }
+            menu.append(menu_item);
+            menu_item.on('click', function(e) {
+                e.stopPropagation();
+                wrapper.remove();
+                this.perform_action(action);
+            }.bind(this));
+        },
+
+        perform_action: function(action) {
+            console.log(action);
+        },
+
         event_clicked: function(cal_evt, js_evt, view) {
-            // cal_evt.editable
-            // cal_evt.id
-            // cal_evt.target
-            console.log(cal_evt);
-            console.log(js_evt);
-            console.log(view);
+            if (!cal_evt.actions) {
+                return;
+            }
+            if (cal_evt.actions.length == 1) {
+                var action = cal_evt.actions[0];
+                calendar.perform_action(action);
+                return;
+            }
+            calendar.create_context_menu(
+                cal_evt.actions,
+                js_evt.pageX,
+                js_evt.pageY
+            );
         },
 
         day_clicked: function(date, js_evt, view) {

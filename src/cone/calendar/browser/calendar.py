@@ -176,10 +176,12 @@ class CalendarEvents(object):
             'end': datetime.datetime,
             'actions': [{
                 'title': 'Edit',
+                'icon': 'glyphicons glyphicons-pencil',
                 'target': 'https://example.com/path/to/event',
                 'overlay': 'overlayedit'
             }, {
                 'title': 'Delete',
+                'icon': 'glyphicons glyphicons-remove-circle',
                 'target': 'https://example.com/path/to/event',
                 'confirm': 'Do you really want to delete this item?'
             }]

@@ -1,0 +1,23 @@
+/* contextmenu */
+.calendar-contextmenu-wrapper {
+    position:absolute;
+    z-index:1000;
+    top:0;
+    left:0;
+    width:100%;
+}
+.calendar-contextmenu {
+    background-color:#fff;
+    position:absolute;
+    z-index:1000;
+}
+.calendar-contextmenu li {
+    padding-left:10px;
+    cursor:pointer;
+}
+.calendar-contextmenu li:hover {
+    background-color:#ccc;
+}
+.calendar-contextmenu li span {
+    margin-right:10px;
+}
