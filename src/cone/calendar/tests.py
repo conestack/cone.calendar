@@ -1,14 +1,17 @@
 from cone.app import testing
 from cone.app.model import BaseNode
 from cone.app.model import Properties
+from cone.calendar.browser import CalendarEvents
 from cone.calendar.browser import CalendarTile
 from cone.tile import render_tile
 from cone.tile.tests import TileTestCase
+from datetime import datetime
 from node.utils import instance_property
 from pyramid.httpexceptions import HTTPForbidden
 import json
 import sys
 import unittest
+import uuid
 
 
 class CalendarLayer(testing.Security):
@@ -166,6 +169,44 @@ class TestCalendarTile(TileTestCase):
         }]
         self.assertEqual(json.loads(calendar.actions), [{
             'title': 'Context Action',
+        }])
+
+
+class TestCalendarEvents(TileTestCase):
+    layer = CalendarLayer()
+
+    def test_calendar_events(self):
+        model = CalendarNode(name='calendar')
+        request = self.layer.new_request()
+
+        events = CalendarEvents(model, request)
+
+        request.params['start'] = '1588312800'
+        self.assertEqual(events.range_start, datetime(2020, 05, 1, 6, 0))
+
+        request.params['end'] = '1588320000'
+        self.assertEqual(events.range_end, datetime(2020, 05, 1, 8, 0))
+
+        with self.assertRaises(NotImplementedError):
+            events.events(events.range_start, events.range_end)
+
+        self.assertEqual(events(), [])
+
+        class MyEvents(CalendarEvents):
+            def events(self, start, end):
+                return [{
+                    'id': uuid.UUID('08148acd-edda-4e37-9d43-662d4b2d5f59'),
+                    'title': 'Title',
+                    'start': datetime(2020, 05, 1, 7, 0),
+                    'end': datetime(2020, 05, 1, 7, 30),
+                }]
+
+        events = MyEvents(model, request)
+        self.assertEqual(events(), [{
+            'id': '08148acd-edda-4e37-9d43-662d4b2d5f59',
+            'title': 'Title',
+            'start': '2020-05-01T07:00:00',
+            'end': '2020-05-01T07:30:00'
         }])
 
 
