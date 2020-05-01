@@ -3,6 +3,7 @@ from cone.app.model import BaseNode
 from cone.app.model import Properties
 from cone.calendar.browser import CalendarEvents
 from cone.calendar.browser import CalendarTile
+from cone.calendar.browser.calendar import JSONView
 from cone.tile import render_tile
 from cone.tile.tests import TileTestCase
 from datetime import datetime
@@ -172,6 +173,37 @@ class TestCalendarTile(TileTestCase):
         }])
 
 
+class TestJSONView(TileTestCase):
+    layer = CalendarLayer()
+
+    def test_json_view(self):
+        model = CalendarNode(name='calendar')
+        request = self.layer.new_request()
+
+        view = JSONView(model, request)
+        with self.assertRaises(NotImplementedError):
+            view.data()
+
+        res = view()
+        self.assertEqual(sorted(res.keys()), ['error', 'message'])
+        self.assertTrue(res['error'])
+        self.checkOutput("""
+        <pre>Traceback (most recent call last):
+        ...
+        NotImplementedError:
+        Abstract ``JSONView`` does not implement ``data``\n</pre>
+        """, res['message'])
+
+        class MyJSONView(JSONView):
+            def data(self):
+                return 'data'
+
+        view = MyJSONView(model, request)
+        res = view()
+        self.assertEqual(sorted(res.keys()), ['data'])
+        self.assertEqual(res['data'], 'data')
+
+
 class TestCalendarEvents(TileTestCase):
     layer = CalendarLayer()
 
@@ -190,7 +222,18 @@ class TestCalendarEvents(TileTestCase):
         with self.assertRaises(NotImplementedError):
             events.events(events.range_start, events.range_end)
 
-        self.assertEqual(events(), [])
+        with self.assertRaises(NotImplementedError):
+            events.data()
+
+        res = events()
+        self.assertEqual(sorted(res.keys()), ['error', 'message'])
+        self.assertTrue(res['error'])
+        self.checkOutput("""
+        <pre>Traceback (most recent call last):
+        ...
+        NotImplementedError:
+        Abstract ``CalendarEvents`` does not implement ``events``\n</pre>
+        """, res['message'])
 
         class MyEvents(CalendarEvents):
             def events(self, start, end):
@@ -202,12 +245,14 @@ class TestCalendarEvents(TileTestCase):
                 }]
 
         events = MyEvents(model, request)
-        self.assertEqual(events(), [{
-            'id': '08148acd-edda-4e37-9d43-662d4b2d5f59',
-            'title': 'Title',
-            'start': '2020-05-01T07:00:00',
-            'end': '2020-05-01T07:30:00'
-        }])
+        self.assertEqual(events(), {
+            'data': [{
+                'id': '08148acd-edda-4e37-9d43-662d4b2d5f59',
+                'title': 'Title',
+                'start': '2020-05-01T07:00:00',
+                'end': '2020-05-01T07:30:00'
+            }]
+        })
 
 
 def run_tests():

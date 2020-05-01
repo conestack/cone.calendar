@@ -34,23 +34,35 @@
             elem.fullCalendar(options);
         },
 
+        json_request: function(url, params, callback, errback) {
+            bdajax.request({
+                url: url,
+                type: 'json',
+                params: params,
+                success: function(data) {
+                    if (data.error) {
+                        errback && errback();
+                        bdajax.error(data.message);
+                    } else {
+                        callback(data.data);
+                    }
+                },
+                error: function() {
+                    errback && errback();
+                    bdajax.error('Failed to request JSON data');
+                }
+            });
+        },
+
         EventSource: function(opts) {
             $.extend(this, opts);
             this.events = function(start, end, timezone, callback) {
-                bdajax.request({
-                    url: calendar.target + '/' + opts.events,
-                    type: 'json',
-                    params: {
-                        start: start.unix(),
-                        end: end.unix()
-                    },
-                    success: function(data) {
-                        callback(data);
-                    },
-                    error: function() {
-                        bdajax.error('Failed to request events');
-                    }
-                });
+                var url = calendar.target + '/' + opts.events;
+                var params = {
+                    start: start.unix(),
+                    end: end.unix()
+                };
+                calendar.json_request(url, params, callback, null);
             };
         },
 
@@ -200,18 +212,8 @@
                 end: cal_evt.end.unix(),
                 delta: delta.asSeconds()
             })
-            bdajax.request({
-                url: target.url + '/' + view,
-                type: 'json',
-                params: target.params,
-                success: function(data) {
-                    callback(data);
-                },
-                error: function() {
-                    revert_func();
-                    bdajax.error('Failed to update event');
-                }
-            });
+            var url = target.url + '/' + view;
+            calendar.json_request(url, target.params, callback, revert_func);
         },
 
         event_drop: function(cal_evt, delta, revert_func) {

@@ -1,4 +1,5 @@
 from cone.app.browser import render_main_template
+from cone.app.browser.utils import format_traceback
 from cone.tile import Tile
 from cone.tile import tile
 from datetime import datetime
@@ -163,14 +164,37 @@ def calendar(model, request):
 
 
 class JSONView(object):
+    """Abstract JSON view.
+    """
 
     def __init__(self, model, request):
         self.model = model
         self.request = request
 
     def __call__(self):
+        """Return dict with JSON data result.
+
+        If success, dict contains data at key 'data'.
+
+        If an exception is raised while computing, dict contains flag indicating
+        error happends at key 'error' and the formatted traceback at key
+        'message'.
+        """
+        try:
+            return dict(data=self.data())
+        except Exception as e:
+            logger.exception(e)
+            return dict(
+                error=True,
+                message=format_traceback()
+            )
+
+    def data(self):
+        """Supposed to be implemented on subclass. Responsible to compute JSON
+        data delivered to client.
+        """
         raise NotImplementedError(
-            'Abstract ``JSONView`` does not implement ``__call__``'
+            'Abstract ``JSONView`` does not implement ``data``'
         )
 
 
@@ -301,20 +325,16 @@ class CalendarEvents(JSONView):
             Confirmation message as string. Optional.
         """
         raise NotImplementedError(
-            'Abstract CalendarEvents does not implement ``events``'
+            'Abstract ``CalendarEvents`` does not implement ``events``'
         )
 
-    def __call__(self):
-        try:
-            events = self.events(self.range_start, self.range_end)
-            for event in events:
-                event['id'] = str(event['id'])
-                event['start'] = format_date(event['start'])
-                event['end'] = format_date(event['end'])
-            return events
-        except Exception as e:
-            logger.exception(e)
-            return []
+    def data(self):
+        events = self.events(self.range_start, self.range_end)
+        for event in events:
+            event['id'] = str(event['id'])
+            event['start'] = format_date(event['start'])
+            event['end'] = format_date(event['end'])
+        return events
 
 
 @view_config(
@@ -327,7 +347,7 @@ class CalendarEventDrop(JSONView):
     """JSON view for modifying event start time.
     """
 
-    def __call__(self):
+    def data(self):
         return 'DROPPED'
 
 
@@ -341,5 +361,5 @@ class CalendarEventResize(JSONView):
     """JSON view for modifying event duration.
     """
 
-    def __call__(self):
+    def data(self):
         return 'RESIZED'
