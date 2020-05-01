@@ -87,7 +87,7 @@ Multiple event data sources are defined via model properties.
         @property
         def properties(self):
             props = Properties()
-            props.calendar_event_sources = [{
+            props.calendar_sources = [{
                 'events': 'event_data_1',
                 'color': 'green'
             }, {

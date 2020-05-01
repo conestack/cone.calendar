@@ -32,7 +32,7 @@ class CalendarTile(Tile):
 
     Configuration of the calendar is done via ``model.properties`` object.
 
-    Available config options:
+    Available configuration properties:
 
     ``calendar_locale``:
         Corresponds to ``locale`` option passed to fullcalendar.
@@ -78,6 +78,19 @@ class CalendarTile(Tile):
 
         See https://fullcalendar.io/docs/v3/businessHours
 
+    ``calendar_sources``:
+        A list of dictionaries containing event source configurations.
+
+        See https://fullcalendar.io/docs/v3/event-source-object
+
+        As ``events`` attribute, a JSON view name is expected. On the client
+        side a callback handler gets created using this view name for fetching
+        event data. The base class for implementing JSON event data is
+        ``CalendarEvents``.
+
+        If ``calendar_sources`` is not defined on model properties,
+        ``CalendarTile.default_sources`` is used.
+
     ``calendar_actions``:
         List of actions for clicking empty day/time in calendar.
 
@@ -91,19 +104,6 @@ class CalendarTile(Tile):
 
         If ``calendar_actions`` is not defined on model properties,
         ``CalendarTile.default_actions`` is used.
-
-    ``calendar_event_sources``:
-        A list of dictionaries containing event source configurations.
-
-        See https://fullcalendar.io/docs/v3/event-source-object
-
-        As ``events`` attribute, a JSON view name is expected. On the client
-        side a callback handler gets created using this view name for fetching
-        event data. The base class for implementing JSON event data is
-        ``CalendarEvents``.
-
-        If ``calendar_event_sources`` is not defined on model properties,
-        ``CalendarTile.default_event_sources`` is used.
     """
     option_mapping = {
         'calendar_locale': 'locale',
@@ -115,7 +115,10 @@ class CalendarTile(Tile):
         'calendar_week_numbers_within_days': 'weekNumbersWithinDays',
         'calendar_business_hours': 'businessHours'
     }
-    default_event_sources = [{
+    default_options = {
+        'calendar_locale': 'en'
+    }
+    default_sources = [{
         'events': 'calendar_events'
     }]
     default_actions = []
@@ -131,15 +134,17 @@ class CalendarTile(Tile):
         options = {}
         for prop_name, option_name in self.option_mapping.items():
             value = getattr(self.model.properties, prop_name)
+            if value is None:
+                value = self.default_options.get(prop_name)
             if value is not None:
                 options[option_name] = value
         return json.dumps(options, sort_keys=True) if options else None
 
     @property
     def sources(self):
-        sources = self.model.properties.calendar_event_sources
+        sources = self.model.properties.calendar_sources
         if not sources:
-            sources = self.default_event_sources
+            sources = self.default_sources
         return json.dumps(sources)
 
     @property
