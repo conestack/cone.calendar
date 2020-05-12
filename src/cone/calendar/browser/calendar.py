@@ -241,6 +241,8 @@ class CalendarEvents(JSONView):
                 'target': 'https://example.com/path/to/event?param=value',
                 'overlay': {
                     'action': 'overlayedit',
+                    'selector': '#ajax-form',
+                    'content_selector': '.overlay_content',
                     'css': 'overlay-form'
                 }
             }, {
@@ -315,7 +317,9 @@ class CalendarEvents(JSONView):
 
             {
                 'action': 'action_name',
-                'css': 'overlay CSS class'
+                'selector': '#ajax-form',
+                'content_selector': '.overlay_content',
+                'css': 'additional_overlay_css_class'
             }
 
             At least one option out of ``action``, ``event`` or ``overlay`` must

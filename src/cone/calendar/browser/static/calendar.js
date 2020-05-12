@@ -149,6 +149,8 @@
                 bdajax.overlay({
                     action: overlay.action,
                     target: target,
+                    selector: overlay.selector,
+                    content_selector: overlay.content_selector,
                     css: overlay.css
                 });
             }
