@@ -31,6 +31,9 @@
                 eventDrop: calendar.event_drop,
                 eventResize: calendar.event_resize
             });
+            elem.bind('reload', function() {
+                elem.fullCalendar('refetchEvents');
+            });
             elem.fullCalendar(options);
         },
 
@@ -195,7 +198,8 @@
 
         day_clicked: function(date, js_evt, view) {
             var params = {
-                data: date.unix(),
+                date: date.unix(),
+                all_day: !date.hasTime(),
                 view: view.name
             };
             calendar.handle_actions(
