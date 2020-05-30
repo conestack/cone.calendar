@@ -137,7 +137,7 @@ Contributors
 Changes
 =======
 
-0.1 (unreleased)
+0.1 (2020-05-30)
 ----------------
 
 - Initial.
