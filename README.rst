@@ -137,6 +137,12 @@ Contributors
 Changes
 =======
 
+0.2 (unreleased)
+----------------
+
+- No changes yet.
+
+
 0.1 (2020-05-30)
 ----------------
 

@@ -1,3 +1,4 @@
 *.pyc
+/dist/
 /src/cone.calendar.egg-info/
 
