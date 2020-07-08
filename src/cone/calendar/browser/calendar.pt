@@ -4,6 +4,9 @@
            i18n:domain="cone.calendar"
            omit-tag="True">
 
+  <tal:contextmenu condition="context.show_contextmenu"
+                   replace="structure tile('contextmenu')" />
+
   <div id="calendar"
        data-calendar_target='${context.target}'
        data-calendar_options='${context.options}'

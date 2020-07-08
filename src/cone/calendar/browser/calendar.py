@@ -106,6 +106,7 @@ class CalendarTile(Tile):
         If ``calendar_actions`` is not defined on model properties,
         ``CalendarTile.default_actions`` is used.
     """
+    show_contextmenu = False
     option_mapping = {
         'calendar_locale': 'locale',
         'calendar_header': 'header',
