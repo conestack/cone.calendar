@@ -160,7 +160,7 @@
         },
 
         handle_actions: function(actions, target, params, x, y) {
-            if (!actions) {
+            if (!actions || !actions.length) {
                 return;
             }
             // get a deepcopy of given actions
