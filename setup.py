@@ -13,6 +13,7 @@ version = '0.2.dev0'
 shortdesc = 'jQuery Fullcalendar integration for cone.app'
 longdesc = '\n\n'.join([read_file(name) for name in [
     'README.rst',
+    'CHANGES.rst',
     'LICENSE.rst'
 ]])
 
