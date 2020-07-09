@@ -214,10 +214,10 @@ class TestCalendarEvents(TileTestCase):
         events = CalendarEvents(model, request)
 
         request.params['start'] = '1588312800'
-        self.assertEqual(events.range_start, datetime(2020, 05, 1, 6, 0))
+        self.assertEqual(events.range_start, datetime(2020, 5, 1, 6, 0))
 
         request.params['end'] = '1588320000'
-        self.assertEqual(events.range_end, datetime(2020, 05, 1, 8, 0))
+        self.assertEqual(events.range_end, datetime(2020, 5, 1, 8, 0))
 
         with self.assertRaises(NotImplementedError):
             events.events(events.range_start, events.range_end)
@@ -240,8 +240,8 @@ class TestCalendarEvents(TileTestCase):
                 return [{
                     'id': uuid.UUID('08148acd-edda-4e37-9d43-662d4b2d5f59'),
                     'title': 'Title',
-                    'start': datetime(2020, 05, 1, 7, 0),
-                    'end': datetime(2020, 05, 1, 7, 30),
+                    'start': datetime(2020, 5, 1, 7, 0),
+                    'end': datetime(2020, 5, 1, 7, 30),
                 }]
 
         events = MyEvents(model, request)
