@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.2 (unreleased)
+0.2 (2020-07-09)
 ----------------
 
 - Add ``show_contextmenu`` to ``CalendarTile``. Defaults to ``False``.
