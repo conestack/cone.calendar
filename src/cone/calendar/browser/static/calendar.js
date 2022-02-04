@@ -1,43 +1,52 @@
-/* globals jQuery, bdajax */
-(function($, bdajax) {
+var cone_calendar = (function (exports, $) {
+    'use strict';
 
-    $(document).ready(function() {
-        bdajax.register(calendar.binder.bind(calendar), true);
-    });
-
-    var calendar = {
-        elem: null,
-        target: null,
-        actions: null,
-
-        binder: function(context) {
-            var elem = $('#calendar', context);
+    class EventSource {
+        constructor(calendar, opts) {
+            this.calendar = calendar;
+            this.opts = opts;
+        }
+        events(start, end, timezone, callback) {
+            let calendar = this.calendar,
+                url = calendar.target + '/' + this.opts.events;
+            let params = {
+                start: start.unix(),
+                end: end.unix()
+            };
+            calendar.json_request(url, params, callback, null);
+        }
+    }
+    class Calendar {
+        static initialize(context) {
+            let elem = $('#calendar', context);
             if (!elem.length) {
                 return;
             }
+            new Calendar(elem);
+        }
+        constructor(elem) {
             this.elem = elem;
             this.target = elem.data('calendar_target');
             this.actions = elem.data('calendar_actions');
-            var sources = elem.data('calendar_sources');
-            var event_sources = [];
-            for (var i in sources) {
-                event_sources.push(new calendar.EventSource(sources[i]));
+            let sources = elem.data('calendar_sources'),
+                event_sources = [];
+            for (let i in sources) {
+                event_sources.push(new EventSource(this, sources[i]));
             }
-            var options = elem.data('calendar_options');
+            let options = elem.data('calendar_options');
             $.extend(options, {
                 eventSources: event_sources,
-                eventClick: calendar.event_clicked,
-                dayClick: calendar.day_clicked,
-                eventDrop: calendar.event_drop,
-                eventResize: calendar.event_resize
+                eventClick: this.event_clicked.bind(this),
+                dayClick: this.day_clicked.bind(this),
+                eventDrop: this.event_drop.bind(this),
+                eventResize: this.event_resize.bind(this)
             });
             elem.bind('reload', function() {
                 elem.fullCalendar('refetchEvents');
             });
             elem.fullCalendar(options);
-        },
-
-        json_request: function(url, params, callback, errback) {
+        }
+        json_request(url, params, callback, errback) {
             bdajax.request({
                 url: url,
                 type: 'json',
@@ -55,23 +64,10 @@
                     bdajax.error('Failed to request JSON data');
                 }
             });
-        },
-
-        EventSource: function(opts) {
-            $.extend(this, opts);
-            this.events = function(start, end, timezone, callback) {
-                var url = calendar.target + '/' + opts.events;
-                var params = {
-                    start: start.unix(),
-                    end: end.unix()
-                };
-                calendar.json_request(url, params, callback, null);
-            };
-        },
-
-        create_context_menu: function(actions, x, y) {
-            var body = $('body', document);
-            var wrapper = $('<div />')
+        }
+        create_context_menu(actions, x, y) {
+            let body = $('body', document);
+            let wrapper = $('<div />')
                 .attr('class', 'calendar-contextmenu-wrapper')
                 .css('height', body.height() + 'px');
             body.append(wrapper);
@@ -79,19 +75,18 @@
                 e.preventDefault();
                 wrapper.remove();
             });
-            var menu = $('<ul />')
+            let menu = $('<ul />')
                 .attr('class', 'calendar-contextmenu dropdown-menu')
                 .css('left', x + 'px')
                 .css('top', y + 'px')
                 .css('display', 'block');
             wrapper.append(menu);
-            for (var i in actions) {
+            for (let i in actions) {
                 this.add_menu_item(wrapper, menu, actions[i]);
             }
-        },
-
-        add_menu_item: function(wrapper, menu, action) {
-            var menu_item = $('<li><span />' + action.title + '</li>');
+        }
+        add_menu_item(wrapper, menu, action) {
+            let menu_item = $('<li><span />' + action.title + '</li>');
             if (action.icon) {
                 $('span', menu_item).attr('class', action.icon);
             }
@@ -101,19 +96,15 @@
                 wrapper.remove();
                 this.handle_action(action);
             }.bind(this));
-        },
-
-        prepare_target: function(target, params) {
-            // parse target if defined as string
+        }
+        prepare_target(target, params) {
             if (!target.url) {
                 target = bdajax.parsetarget(target);
             }
-            // extend query params by additional params
             $.extend(target.params, params);
             return target;
-        },
-
-        handle_action: function(action) {
+        }
+        handle_action(action) {
             if (!action.target) {
                 return;
             }
@@ -126,10 +117,9 @@
             } else {
                 this.perform_action(action);
             }
-        },
-
-        perform_action: function(action) {
-            var target = action.target;
+        }
+        perform_action(action) {
+            let target = action.target;
             if (action.action) {
                 bdajax.action({
                     name: action.action.name,
@@ -140,7 +130,7 @@
                 });
             }
             if (action.event) {
-                var event = action.event;
+                let event = action.event;
                 bdajax.trigger(
                     event.name,
                     event.selector,
@@ -148,7 +138,7 @@
                 );
             }
             if (action.overlay) {
-                var overlay = action.overlay;
+                let overlay = action.overlay;
                 bdajax.overlay({
                     action: overlay.action,
                     target: target,
@@ -157,92 +147,92 @@
                     css: overlay.css
                 });
             }
-        },
-
-        handle_actions: function(actions, target, params, x, y) {
+        }
+        handle_actions(actions, target, params, x, y) {
             if (!actions || !actions.length) {
                 return;
             }
-            // get a deepcopy of given actions
             actions = JSON.parse(JSON.stringify(actions));
-            // prepare action target
-            for (var i in actions) {
-                var action = actions[i];
+            for (let i in actions) {
+                let action = actions[i];
                 action.target = this.prepare_target(
                     action.target || target,
                     params
                 );
             }
-            // only one action defined, gets executed direclty
             if (actions.length == 1) {
-                var action = actions[0];
+                let action = actions[0];
                 this.handle_action(action);
                 return;
             }
-            // more than one action found, display context menu
             this.create_context_menu(actions, x, y);
-        },
-
-        event_clicked: function(cal_evt, js_evt, view) {
-            var params = {
+        }
+        event_clicked(cal_evt, js_evt, view) {
+            let params = {
                 view: view.name
             };
-            calendar.handle_actions(
+            this.handle_actions(
                 cal_evt.actions,
                 cal_evt.target,
                 params,
                 js_evt.pageX,
                 js_evt.pageY
             );
-        },
-
-        day_clicked: function(date, js_evt, view) {
-            var params = {
+        }
+        day_clicked(date, js_evt, view) {
+            let params = {
                 date: date.unix(),
                 all_day: !date.hasTime(),
                 view: view.name
             };
-            calendar.handle_actions(
-                calendar.actions,
-                calendar.target,
+            this.handle_actions(
+                this.actions,
+                this.target,
                 params,
                 js_evt.pageX,
                 js_evt.pageY
             );
-        },
-
-        update_event: function(cal_evt, delta, revert_func, view, callback) {
-            var target = this.prepare_target(cal_evt.target, {
+        }
+        update_event(cal_evt, delta, revert_func, view, callback) {
+            let target = this.prepare_target(cal_evt.target, {
                 id: cal_evt.id,
                 start: cal_evt.start.unix(),
                 end: cal_evt.end.unix(),
                 delta: delta.asSeconds()
-            })
-            var url = target.url + '/' + view;
-            calendar.json_request(url, target.params, callback, revert_func);
-        },
-
-        event_drop: function(cal_evt, delta, revert_func) {
+            });
+            let url = target.url + '/' + view;
+            this.json_request(url, target.params, callback, revert_func);
+        }
+        event_drop(cal_evt, delta, revert_func) {
             if (!cal_evt.editable && !cal_evt.startEditable) {
                 return;
             }
-            var view = 'calendar_event_drop'
-            var cb = function(data) {
+            let view = 'calendar_event_drop';
+            let cb = function(data) {
                 console.log(data);
-            }
-            calendar.update_event(cal_evt, delta, revert_func, view, cb);
-        },
-
-        event_resize: function(cal_evt, delta, revert_func) {
+            };
+            this.update_event(cal_evt, delta, revert_func, view, cb);
+        }
+        event_resize(cal_evt, delta, revert_func) {
             if (!cal_evt.editable && !cal_evt.durationEditable) {
                 return;
             }
-            var view = 'calendar_event_resize'
-            var cb = function(data) {
+            let view = 'calendar_event_resize';
+            let cb = function(data) {
                 console.log(data);
-            }
-            calendar.update_event(cal_evt, delta, revert_func, view, cb);
+            };
+            this.update_event(cal_evt, delta, revert_func, view, cb);
         }
-    };
+    }
 
-})(jQuery, bdajax);
+    $(function() {
+        bdajax.register(Calendar.initialize, true);
+    });
+
+    exports.Calendar = Calendar;
+
+    Object.defineProperty(exports, '__esModule', { value: true });
+
+    return exports;
+
+})({}, jQuery);
