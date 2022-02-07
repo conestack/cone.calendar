@@ -4,7 +4,8 @@ Changes
 0.3 (unreleased)
 ----------------
 
-- No changes yet.
+- Modernize JavaScript.
+  [rnix]
 
 
 0.2 (2020-07-09)
