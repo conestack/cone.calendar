@@ -3,13 +3,16 @@ import $ from 'jquery';
 class EventSource {
 
     constructor(calendar, opts) {
-        this.calendar = calendar;
-        this.opts = opts;
+        this._calendar = calendar;
+        this._events_view = opts.events;
+        delete opts.events;
+        Object.assign(this, opts);
+        this.events = this.events.bind(this);
     }
 
     events(start, end, timezone, callback) {
-        let calendar = this.calendar,
-            url = calendar.target + '/' + this.opts.events;
+        let calendar = this._calendar,
+            url = calendar.target + '/' + this._events_view;
         let params = {
             start: start.unix(),
             end: end.unix()
