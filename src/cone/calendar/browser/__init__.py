@@ -83,6 +83,7 @@ def configure_resources(settings):
             name=locale_name,
             depends='fullcalendar-js',
             directory=locales_directory,
+            path='fullcalendar/locale',
             resource='{}.js'.format(locale)
         ))
         set_resource_include(settings, locale_name, 'authenticated')
