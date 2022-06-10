@@ -2,7 +2,6 @@ from .calendar import CalendarEvents  # noqa
 from .calendar import CalendarTile  # noqa
 from cone.app.browser.resources import resources
 from cone.app.browser.resources import set_resource_include
-from pyramid.static import static_view
 import os
 import webresource as wr
 
@@ -47,7 +46,7 @@ fullcalendar_resources.add(wr.StyleResource(
 
 cone_calendar_resources = wr.ResourceGroup(
     name='cone.calendar-calendar',
-    directory=resources_dir,
+    directory=os.path.join(resources_dir, 'calendar'),
     path='calendar',
     group=resources
 )

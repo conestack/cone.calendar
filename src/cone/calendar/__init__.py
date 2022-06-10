@@ -1,4 +1,3 @@
-from cone.app import cfg
 from cone.app import main_hook
 from cone.calendar.browser import configure_resources
 import logging

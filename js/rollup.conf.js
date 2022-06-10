@@ -1,7 +1,7 @@
 import cleanup from 'rollup-plugin-cleanup';
 import {terser} from 'rollup-plugin-terser';
 
-let out_path = 'src/cone/calendar/browser/static';
+let out_path = 'src/cone/calendar/browser/static/calendar';
 
 export default args => {
     let conf = {
