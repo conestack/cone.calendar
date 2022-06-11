@@ -8,7 +8,7 @@ import webresource as wr
 
 resources_dir = os.path.join(os.path.dirname(__file__), 'static')
 
-
+# moment js
 moment_resources = wr.ResourceGroup(
     name='cone.calendar-moment',
     directory=os.path.join(resources_dir, 'moment'),
@@ -20,6 +20,7 @@ moment_resources.add(wr.ScriptResource(
     resource='moment.min.js'
 ))
 
+# fullcalendar
 fullcalendar_resources = wr.ResourceGroup(
     name='cone.calendar-fullcalendar',
     directory=os.path.join(resources_dir, 'fullcalendar'),
@@ -44,6 +45,7 @@ fullcalendar_resources.add(wr.StyleResource(
 #     compressed='fullcalendar.print.min.css'
 # ))
 
+# cone calendar
 cone_calendar_resources = wr.ResourceGroup(
     name='cone.calendar-calendar',
     directory=os.path.join(resources_dir, 'calendar'),
@@ -53,13 +55,13 @@ cone_calendar_resources = wr.ResourceGroup(
 cone_calendar_resources.add(wr.ScriptResource(
     name='cone-calendar-js',
     depends='fullcalendar-js',
-    resource='calendar.js',
-    compressed='calendar.min.js'
+    resource='cone.calendar.js',
+    compressed='cone.calendar.min.js'
 ))
 cone_calendar_resources.add(wr.StyleResource(
     name='cone-calendar-css',
     depends='fullcalendar-css',
-    resource='calendar.css'
+    resource='cone.calendar.css'
 ))
 
 

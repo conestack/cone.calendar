@@ -10,7 +10,7 @@ export default args => {
             cleanup()
         ],
         output: [{
-            file: `${out_path}/calendar.js`,
+            file: `${out_path}/cone.calendar.js`,
             name: 'cone_calendar',
             format: 'iife',
             globals: {
@@ -25,7 +25,7 @@ export default args => {
     };
     if (args.configDebug !== true) {
         conf.output.push({
-            file: `${out_path}/calendar.min.js`,
+            file: `${out_path}/cone.calendar.min.js`,
             name: 'cone_calendar',
             format: 'iife',
             plugins: [

@@ -328,7 +328,7 @@ class TestResources(unittest.TestCase):
 
         self.assertTrue(scripts[0].directory.endswith(np('/static')))
         self.assertEqual(scripts[0].path, 'calendar')
-        self.assertEqual(scripts[0].file_name, 'calendar.min.js')
+        self.assertEqual(scripts[0].file_name, 'cone.calendar.min.js')
         self.assertTrue(os.path.exists(scripts[0].file_path))
 
         styles = resources_.styles
@@ -336,7 +336,7 @@ class TestResources(unittest.TestCase):
 
         self.assertTrue(styles[0].directory.endswith(np('/static')))
         self.assertEqual(styles[0].path, 'calendar')
-        self.assertEqual(styles[0].file_name, 'calendar.css')
+        self.assertEqual(styles[0].file_name, 'cone.calendar.css')
         self.assertTrue(os.path.exists(styles[0].file_path))
 
 

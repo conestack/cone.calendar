@@ -10,11 +10,11 @@ logger = logging.getLogger('cone.calendar')
 def initialize_calendar(config, global_config, settings):
     # application startup initialization
 
-    # add translation
-    config.add_translation_dirs('cone.calendar:locale/')
-
     # static resources
     configure_resources(settings)
+
+    # add translation
+    config.add_translation_dirs('cone.calendar:locale/')
 
     # scan browser package
     config.scan('cone.calendar.browser')
