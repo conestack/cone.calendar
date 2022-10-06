@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.3 (unreleased)
+0.3 (2022-10-06)
 ----------------
 
 - Modernize JavaScript.
