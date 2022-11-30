@@ -1,7 +1,13 @@
 Changes
 =======
 
-0.3 (unreleased)
+0.4 (unreleased)
+----------------
+
+- Nothing changed yet.
+
+
+0.3 (2022-10-06)
 ----------------
 
 - Modernize JavaScript.
