@@ -1,7 +1,5 @@
 from .calendar import CalendarEvents  # noqa
 from .calendar import CalendarTile  # noqa
-from cone.app.browser.resources import resources
-from cone.app.browser.resources import set_resource_include
 import os
 import webresource as wr
 
@@ -12,8 +10,7 @@ resources_dir = os.path.join(os.path.dirname(__file__), 'static')
 moment_resources = wr.ResourceGroup(
     name='cone.calendar-moment',
     directory=os.path.join(resources_dir, 'moment'),
-    path='moment',
-    group=resources
+    path='moment'
 )
 moment_resources.add(wr.ScriptResource(
     name='moment-js',
@@ -24,8 +21,7 @@ moment_resources.add(wr.ScriptResource(
 fullcalendar_resources = wr.ResourceGroup(
     name='cone.calendar-fullcalendar',
     directory=os.path.join(resources_dir, 'fullcalendar'),
-    path='fullcalendar',
-    group=resources
+    path='fullcalendar'
 )
 fullcalendar_resources.add(wr.ScriptResource(
     name='fullcalendar-js',
@@ -49,8 +45,7 @@ fullcalendar_resources.add(wr.StyleResource(
 cone_calendar_resources = wr.ResourceGroup(
     name='cone.calendar-calendar',
     directory=os.path.join(resources_dir, 'calendar'),
-    path='calendar',
-    group=resources
+    path='calendar'
 )
 cone_calendar_resources.add(wr.ScriptResource(
     name='cone-calendar-js',
@@ -65,14 +60,17 @@ cone_calendar_resources.add(wr.StyleResource(
 ))
 
 
-def configure_resources(settings):
-    set_resource_include(settings, 'moment-js', 'authenticated')
+def configure_resources(config, settings):
+    config.register_resource(moment_resources)
+    config.set_resource_include('moment-js', 'authenticated')
 
-    set_resource_include(settings, 'fullcalendar-js', 'authenticated')
-    set_resource_include(settings, 'fullcalendar-css', 'authenticated')
+    config.register_resource(fullcalendar_resources)
+    config.set_resource_include('fullcalendar-js', 'authenticated')
+    config.set_resource_include('fullcalendar-css', 'authenticated')
 
-    set_resource_include(settings, 'cone-calendar-js', 'authenticated')
-    set_resource_include(settings, 'cone-calendar-css', 'authenticated')
+    config.register_resource(cone_calendar_resources)
+    config.set_resource_include('cone-calendar-js', 'authenticated')
+    config.set_resource_include('cone-calendar-css', 'authenticated')
 
     locales = settings.get('cone.calendar.locales')
     if not locales:
@@ -87,4 +85,4 @@ def configure_resources(settings):
             path='fullcalendar/locale',
             resource='{}.js'.format(locale)
         ))
-        set_resource_include(settings, locale_name, 'authenticated')
+        config.set_resource_include(locale_name, 'authenticated')
