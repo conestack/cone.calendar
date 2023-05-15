@@ -1,10 +1,11 @@
 Changes
 =======
 
-0.4 (unreleased)
-----------------
+1.0a1 (unreleased)
+------------------
 
-- Nothing changed yet.
+- Use ``webresource`` for resource registration.
+  [rnix]
 
 
 0.3 (2022-10-06)
