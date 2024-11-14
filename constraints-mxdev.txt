@@ -1,0 +1,7 @@
+###############################################################################
+# mxdev constraint overrides
+pyramid==1.9.4
+repoze.zcml==1.1
+repoze.workflow==1.1
+
+

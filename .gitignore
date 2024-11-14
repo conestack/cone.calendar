@@ -1,6 +1,9 @@
 *.pyc
+/.mxmake/
+/.venv/
+/coverage/
 /dist/
 /node_modules/
 /package-lock.json
 /src/cone.calendar.egg-info/
-
+/venv/

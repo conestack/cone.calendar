@@ -1,7 +1,7 @@
 import cleanup from 'rollup-plugin-cleanup';
-import {terser} from 'rollup-plugin-terser';
+import terser from '@rollup/plugin-terser';
 
-let out_path = 'src/cone/calendar/browser/static/calendar';
+const out_dir = 'src/cone/calendar/browser/static/calendar';
 
 export default args => {
     let conf = {
@@ -10,7 +10,7 @@ export default args => {
             cleanup()
         ],
         output: [{
-            file: `${out_path}/cone.calendar.js`,
+            file: `${out_dir}/cone.calendar.js`,
             name: 'cone_calendar',
             format: 'iife',
             globals: {
@@ -25,7 +25,7 @@ export default args => {
     };
     if (args.configDebug !== true) {
         conf.output.push({
-            file: `${out_path}/cone.calendar.min.js`,
+            file: `${out_dir}/cone.calendar.min.js`,
             name: 'cone_calendar',
             format: 'iife',
             plugins: [
