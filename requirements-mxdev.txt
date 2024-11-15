@@ -1,3 +1,21 @@
 ###############################################################################
+# mxdev combined constraints
+-c constraints-mxdev.txt
+
+###############################################################################
+# mxdev development sources
+-e ./sources/odict
+-e ./sources/plumber
+-e ./sources/node
+-e ./sources/node.ext.ugm
+-e ./sources/webresource
+-e ./sources/treibstoff
+-e ./sources/cone.tile
+-e ./sources/cone.app
+-e ./sources/yafowil
+-e ./sources/yafowil.bootstrap
+
+
+###############################################################################
 # main package
 -e .[test]

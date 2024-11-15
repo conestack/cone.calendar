@@ -42,11 +42,9 @@ setup(
         'cone.app',
         'yafowil.widget.cron'
     ],
-    extras_require=dict(test=[
-        'lxml',
-        'yafowil.yaml',
+    extras_require=dict(
+    test=[
         'pytest',
-        'zope.pytestlayer',
-        'zope.testrunner'
+        'zope.pytestlayer'
     ])
 )
