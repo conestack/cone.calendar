@@ -39,8 +39,9 @@ setup(
     zip_safe=False,
     install_requires=[
         'setuptools',
-        'cone.app',
-        'yafowil.widget.cron'
+        'cone.app[lxml]>=1.0.3',
+        'yafowil.widget.cron',
+        'yafowil.yaml'
     ],
     extras_require=dict(
     test=[
