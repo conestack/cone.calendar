@@ -1,7 +1,9 @@
 import cleanup from 'rollup-plugin-cleanup';
 import terser from '@rollup/plugin-terser';
+import resolve from '@rollup/plugin-node-resolve';
 
 const out_dir = 'src/cone/calendar/browser/static/calendar';
+const out_dir_fullcalendar = 'src/cone/calendar/browser/static/fullcalendar';
 
 export default args => {
     let conf = [];
@@ -83,6 +85,46 @@ export default args => {
         });
     }
     conf.push(bundle_bs5);
+
+    let bundle_fullcalendar = {
+        input: 'js/src/bootstrap5/fullcalendar_bundle.js',
+        plugins: [
+            resolve(),
+            cleanup()
+        ],
+        output: [{
+            file: `${out_dir_fullcalendar}/bootstrap5/fullcalendar.js`,
+            name: 'fullcalendar',
+            format: 'iife',
+            plugins: [
+                // terser()
+            ],
+            globals: {
+                '@fullcalendar/core': 'FullCalendar',
+                '@fullcalendar/daygrid': 'FullCalendarDayGrid',
+                '@fullcalendar/timegrid': 'FullCalendarTimeGrid',
+                '@fullcalendar/list': 'FullCalendarList',
+                '@fullcalendar/interaction': 'FullCalendarInteraction',
+            },
+            // globals: {
+            //     '@fullcalendar/core': 'FullCalendarCore',
+            //     '@fullcalendar/daygrid': 'FullCalendarDayGrid',
+            //     '@fullcalendar/timegrid': 'FullCalendarTimeGrid',
+            //     '@fullcalendar/list': 'FullCalendarList',
+            //     '@fullcalendar/interaction': 'FullCalendarInteraction',
+            // },
+            // external: [
+            //     '@fullcalendar/core',
+            //     '@fullcalendar/daygrid',
+            //     '@fullcalendar/timegrid',
+            //     '@fullcalendar/list',
+            //     '@fullcalendar/interaction',
+            // ],
+            interop: 'default',
+            sourcemap: false
+        }]
+    }
+    conf.push(bundle_fullcalendar);
 
     return conf;
 };

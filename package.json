@@ -1,7 +1,12 @@
 {
   "devDependencies": {
-    "@rollup/plugin-terser": "^0.4.4",
     "@fullcalendar/core": "^6.1.15",
+    "@fullcalendar/daygrid": "^6.1.15",
+    "@fullcalendar/interaction": "^6.1.15",
+    "@fullcalendar/list": "^6.1.15",
+    "@fullcalendar/timegrid": "^6.1.15",
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "@rollup/plugin-terser": "^0.4.4",
     "rollup": "^2.79.2",
     "rollup-plugin-cleanup": "^3.2.1"
   },

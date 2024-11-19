@@ -9,14 +9,20 @@ var cone_calendar = (function (exports, $) {
             Object.assign(this, opts);
             this.events = this.events.bind(this);
         }
-        events(start, end, timezone, callback) {
-            let calendar = this._calendar,
-                url = calendar.target + '/' + this._events_view;
+        events(info, successCallback, failureCallback) {
+            let calendar = this._calendar;
+            let url = calendar.target + '/' + this._events_view;
             let params = {
-                start: start.unix(),
-                end: end.unix()
+                start: Math.floor(info.start.getTime() / 1000),
+                end: Math.floor(info.end.getTime() / 1000),
+                timezone: info.timeZone || 'local'
             };
-            calendar.json_request(url, params, callback, null);
+            calendar.json_request(url, params, (events) => {
+                successCallback(events);
+            }, (error) => {
+                console.error('Error fetching events:', error);
+                failureCallback(error);
+            });
         }
     }
     class Calendar {
@@ -40,14 +46,20 @@ var cone_calendar = (function (exports, $) {
             $.extend(options, {
                 eventSources: event_sources,
                 eventClick: this.event_clicked.bind(this),
-                dayClick: this.day_clicked.bind(this),
+                dateClick: this.date_clicked.bind(this),
                 eventDrop: this.event_drop.bind(this),
-                eventResize: this.event_resize.bind(this)
+                eventResize: this.event_resize.bind(this),
+                plugins: [
+                    fullcalendar.dayGridPlugin,
+                    fullcalendar.timeGridPlugin,
+                    fullcalendar.listPlugin,
+                    fullcalendar.interactionPlugin
+                ]
             });
-            elem.bind('reload', function() {
+            const calendar = new fullcalendar.Calendar(this.elem.get(0), options);
+            elem.on('reload', function() {
+                calendar.refetchEvents();
             });
-            const calendar = new FullCalendar.Calendar(this.elem.get(0),
-            );
             calendar.render();
         }
         json_request(url, params, callback, errback) {
@@ -183,18 +195,22 @@ var cone_calendar = (function (exports, $) {
                 js_evt.pageY
             );
         }
-        day_clicked(date, js_evt, view) {
+        date_clicked(info) {
+            const e = info.js_evt;
+            const date = info.date;
+            console.log(info);
+            console.log(info.date.getSeconds());
             let params = {
-                date: date.unix(),
+                date: Math.floor(info.date.getTime() / 1000),
                 all_day: !date.hasTime(),
-                view: view.name
+                view: info.view.name
             };
             this.handle_actions(
                 this.actions,
                 this.target,
                 params,
-                js_evt.pageX,
-                js_evt.pageY
+                e.pageX,
+                e.pageY
             );
         }
         update_event(cal_evt, delta, revert_func, view, callback) {

@@ -87,9 +87,10 @@ bootstrap5_fullcalendar_resources = wr.ResourceGroup(
 bootstrap5_fullcalendar_resources.add(wr.ScriptResource(
     name='fullcalendar-bootstrap5-js',
     directory=os.path.join(resources_dir, 'fullcalendar', 'bootstrap5'),
+    # depends='moment-js',
     path='fullcalendar/bootstrap5',
-    resource='index.global.js',
-    compressed='index.global.min.js'
+    resource='fullcalendar.js',
+    # compressed='fullcalendar.min.js'
 ))
 
 # cone calendar
@@ -146,3 +147,20 @@ def configure_resources(config, settings):
     config.register_resource(bootstrap5_cone_calendar_resources)
     # config.set_resource_include('cone-calendar-js', 'authenticated')
     # config.set_resource_include('cone-calendar-css', 'authenticated')
+
+    # locales = settings.get('cone.calendar.locales')
+    # if not locales:
+    #     return
+    # locales_directory = os.path.join(resources_dir, 'fullcalendar', 'bootstrap5',
+    #                                  'core', 'locales')
+    # for locale in [loc.strip() for loc in locales.split(',') if loc]:
+    #     locale_name = 'fullcalendar-{}-js'.format(locale)
+    #     bootstrap5_fullcalendar_resources.add(wr.ScriptResource(
+    #         name=locale_name,
+    #         depends='fullcalendar-bootstrap5-js',
+    #         directory=locales_directory,
+    #         path='fullcalendar/bootstrap5/core/locales',
+    #         resource='{}.global.js'.format(locale),
+    #         compressed='{}.global.min.js'.format(locale)
+    #     ))
+        # config.set_resource_include(locale_name, 'authenticated')

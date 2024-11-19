@@ -1,6 +1,4 @@
 import $ from 'jquery';
-// import {Calendar as FullCalendar} from 'fullcalendar';
-// import { Calendar as FullCalendar } from '@fullcalendar/core';
 
 class EventSource {
 
@@ -12,14 +10,23 @@ class EventSource {
         this.events = this.events.bind(this);
     }
 
-    events(start, end, timezone, callback) {
-        let calendar = this._calendar,
-            url = calendar.target + '/' + this._events_view;
+    events(info, successCallback, failureCallback) {
+        let calendar = this._calendar;
+        let url = calendar.target + '/' + this._events_view;
+
+        // XXX: Have a feeling this can be better, included functionality
         let params = {
-            start: start.unix(),
-            end: end.unix()
+            start: Math.floor(info.start.getTime() / 1000),
+            end: Math.floor(info.end.getTime() / 1000),
+            timezone: info.timeZone || 'local'
         };
-        calendar.json_request(url, params, callback, null);
+
+        calendar.json_request(url, params, (events) => {
+            successCallback(events);
+        }, (error) => {
+            console.error('Error fetching events:', error);
+            failureCallback(error);
+        });
     }
 }
 
@@ -46,21 +53,22 @@ export class Calendar {
         $.extend(options, {
             eventSources: event_sources,
             eventClick: this.event_clicked.bind(this),
-            dayClick: this.day_clicked.bind(this),
+            dateClick: this.date_clicked.bind(this),
             eventDrop: this.event_drop.bind(this),
-            eventResize: this.event_resize.bind(this)
+            eventResize: this.event_resize.bind(this),
+            plugins: [
+                fullcalendar.dayGridPlugin,
+                fullcalendar.timeGridPlugin,
+                fullcalendar.listPlugin,
+                fullcalendar.interactionPlugin
+            ]
         });
-        elem.bind('reload', function() {
-            // XXX
-            // elem.fullCalendar('refetchEvents');
-        });
+        const calendar = new fullcalendar.Calendar(this.elem.get(0), options);
 
-        const calendar = new FullCalendar.Calendar(this.elem.get(0),
-            // initialView: 'dayGridMonth'
-            // options
-        )
+        elem.on('reload', function() {
+            calendar.refetchEvents();
+        });
         calendar.render();
-        // elem.fullCalendar(options);
     }
 
     json_request(url, params, callback, errback) {
@@ -210,18 +218,21 @@ export class Calendar {
         );
     }
 
-    day_clicked(date, js_evt, view) {
+    date_clicked(info) {
+        const e = info.js_evt;
+        const date = info.date;
+        // XXX: docs say date is JS DateTime, but it's not?
         let params = {
             date: date.unix(),
             all_day: !date.hasTime(),
-            view: view.name
+            view: info.view.name
         };
         this.handle_actions(
             this.actions,
             this.target,
             params,
-            js_evt.pageX,
-            js_evt.pageY
+            e.pageX,
+            e.pageY
         );
     }
 
