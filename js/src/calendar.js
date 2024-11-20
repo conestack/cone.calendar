@@ -76,11 +76,11 @@ export class Calendar {
         });
         calendar.render();
         $(window).on('resize', this.on_resize.bind(this));
-        global_events.on('on_sidebar_resize', () => console.log('AAAA'));
         this.on_resize();
     }
 
     on_resize(evt) {
+        // XXX: on_sidebar_resize within cone.app
         const width = $(window).width();
         if (width <= 700 && (this._window_width > 700 || !evt)) {
             this.calendar.setOption('height', 'auto');
