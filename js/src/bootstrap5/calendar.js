@@ -76,6 +76,7 @@ export class Calendar {
         });
         calendar.render();
         $(window).on('resize', this.on_resize.bind(this));
+        global_events.on('on_sidebar_resize', () => console.log('AAAA'));
         this.on_resize();
     }
 
