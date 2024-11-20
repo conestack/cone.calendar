@@ -8,6 +8,7 @@
                    replace="structure tile('contextmenu')" />
 
   <div id="calendar"
+       class="mt-4"
        data-calendar_target='${context.target}'
        data-calendar_options='${context.options}'
        data-calendar_sources='${context.sources}'

@@ -50,17 +50,34 @@ var cone_calendar = (function (exports, $) {
                 eventDrop: this.event_drop.bind(this),
                 eventResize: this.event_resize.bind(this),
                 plugins: [
+                    fullcalendar.bootstrap5Plugin,
                     fullcalendar.dayGridPlugin,
                     fullcalendar.timeGridPlugin,
                     fullcalendar.listPlugin,
                     fullcalendar.interactionPlugin
-                ]
+                ],
+                themeSystem: 'bootstrap5',
+                height: 'auto'
             });
-            const calendar = new fullcalendar.Calendar(this.elem.get(0), options);
+            const calendar = this.calendar = new fullcalendar.Calendar(
+                this.elem.get(0),
+                options
+            );
             elem.on('reload', function() {
                 calendar.refetchEvents();
             });
             calendar.render();
+            $(window).on('resize', this.on_resize.bind(this));
+            this.on_resize();
+        }
+        on_resize(evt) {
+            const width = $(window).width();
+            if (width <= 700 && (this._window_width > 700 || !evt)) {
+                this.calendar.setOption('height', 'auto');
+            } else if (width > 700 && (this._window_width <= 700 || !evt)) {
+                this.calendar.setOption('height', undefined);
+            }
+            this._window_width = width;
         }
         json_request(url, params, callback, errback) {
             bdajax.request({
@@ -183,26 +200,27 @@ var cone_calendar = (function (exports, $) {
             }
             this.create_context_menu(actions, x, y);
         }
-        event_clicked(cal_evt, js_evt, view) {
+        event_clicked(info) {
+            console.log(info.event);
+            console.log(info.event.extendedProps);
+            const e = info.jsEvent;
             let params = {
-                view: view.name
+                view: info.view.name
             };
             this.handle_actions(
-                cal_evt.actions,
-                cal_evt.target,
+                info.event.actions,
+                info.event.target,
                 params,
-                js_evt.pageX,
-                js_evt.pageY
+                e.pageX,
+                e.pageY
             );
         }
         date_clicked(info) {
-            const e = info.js_evt;
+            const e = info.jsEvent;
             const date = info.date;
-            console.log(info);
-            console.log(info.date.getSeconds());
             let params = {
-                date: Math.floor(info.date.getTime() / 1000),
-                all_day: !date.hasTime(),
+                date: Math.floor(date.getTime() / 1000),
+                all_day: date.allDay,
                 view: info.view.name
             };
             this.handle_actions(
@@ -216,8 +234,8 @@ var cone_calendar = (function (exports, $) {
         update_event(cal_evt, delta, revert_func, view, callback) {
             let target = this.prepare_target(cal_evt.target, {
                 id: cal_evt.id,
-                start: cal_evt.start.unix(),
-                end: cal_evt.end.unix(),
+                start: Math.floor(cal_evt.start.getTime() / 1000),
+                end: Math.floor(cal_evt.end.getTime() / 1000),
                 delta: delta.asSeconds()
             });
             let url = target.url + '/' + view;

@@ -1,5 +1,6 @@
 import cleanup from 'rollup-plugin-cleanup';
 import terser from '@rollup/plugin-terser';
+import postcss from 'rollup-plugin-postcss';
 import resolve from '@rollup/plugin-node-resolve';
 
 const out_dir = 'src/cone/calendar/browser/static/calendar';
@@ -48,6 +49,25 @@ export default args => {
     }
     conf.push(bundle_default);
 
+    let scss_default = {
+        input: ['scss/default/styles.scss'],
+        output: [{
+            file: `${out_dir}/default/cone.calendar.css`,
+            format: 'es',
+            plugins: [terser()],
+        }],
+        plugins: [
+            postcss({
+                extract: true,
+                minimize: true,
+                use: [
+                    ['sass', { outputStyle: 'compressed' }],
+                ],
+            }),
+        ],
+    };
+    conf.push(scss_default);
+
     ////////////////////////////////////////////////////////////////////////////
     // BOOTSTRAP5
     ////////////////////////////////////////////////////////////////////////////
@@ -86,6 +106,25 @@ export default args => {
     }
     conf.push(bundle_bs5);
 
+    let scss_bs5 = {
+        input: ['scss/bootstrap5/styles.scss'],
+        output: [{
+            file: `${out_dir}/bootstrap5/cone.calendar.css`,
+            format: 'es',
+            plugins: [terser()],
+        }],
+        plugins: [
+            postcss({
+                extract: true,
+                minimize: true,
+                use: [
+                    ['sass', { outputStyle: 'compressed' }],
+                ],
+            }),
+        ],
+    };
+    conf.push(scss_bs5);
+
     let bundle_fullcalendar = {
         input: 'js/src/bootstrap5/fullcalendar_bundle.js',
         plugins: [
@@ -105,21 +144,8 @@ export default args => {
                 '@fullcalendar/timegrid': 'FullCalendarTimeGrid',
                 '@fullcalendar/list': 'FullCalendarList',
                 '@fullcalendar/interaction': 'FullCalendarInteraction',
+                '@fullcalendar/bootstrap5': 'FullCalendarBootstrap5',
             },
-            // globals: {
-            //     '@fullcalendar/core': 'FullCalendarCore',
-            //     '@fullcalendar/daygrid': 'FullCalendarDayGrid',
-            //     '@fullcalendar/timegrid': 'FullCalendarTimeGrid',
-            //     '@fullcalendar/list': 'FullCalendarList',
-            //     '@fullcalendar/interaction': 'FullCalendarInteraction',
-            // },
-            // external: [
-            //     '@fullcalendar/core',
-            //     '@fullcalendar/daygrid',
-            //     '@fullcalendar/timegrid',
-            //     '@fullcalendar/list',
-            //     '@fullcalendar/interaction',
-            // ],
             interop: 'default',
             sourcemap: false
         }]

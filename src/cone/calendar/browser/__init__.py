@@ -107,6 +107,12 @@ bootstrap5_cone_calendar_resources.add(wr.ScriptResource(
     resource='cone.calendar.js',
     compressed='cone.calendar.min.js'
 ))
+bootstrap5_cone_calendar_resources.add(wr.StyleResource(
+    name='cone-calendar-bootstrap5-css',
+    directory=os.path.join(resources_dir, 'calendar', 'bootstrap5'),
+    path='calendar/bootstrap5',
+    resource='cone.calendar.css'
+))
 
 
 def configure_resources(config, settings):
