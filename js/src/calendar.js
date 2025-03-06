@@ -71,12 +71,20 @@ export class Calendar {
             options
         );
 
-        elem.on('reload', function() {
-            calendar.refetchEvents();
-        });
+        this.refetch_events = this.refetch_events.bind(this);
+        this.elem.on('reload', this.refetch_events);
         calendar.render();
-        $(window).on('resize', this.on_resize.bind(this));
+        this.on_resize = this.on_resize.bind(this);
+        $(window).on('resize', this.on_resize);
         this.on_resize();
+
+        if (window.ts !== undefined) {
+            window.ts.ajax.attach(this, elem);
+        }
+    }
+
+    refetch_events() {
+        calendar.refetchEvents();
     }
 
     on_resize(evt) {
@@ -116,6 +124,7 @@ export class Calendar {
             .attr('class', 'calendar-contextmenu-wrapper')
             .css('height', body.height() + 'px');
         body.append(wrapper);
+        // XXX: when does this happen
         wrapper.on('click contextmenu', function(e) {
             e.preventDefault();
             wrapper.remove();
@@ -287,5 +296,12 @@ export class Calendar {
             console.log(data);
         }
         this.update_event(cal_evt, delta, revert_func, view, cb);
+    }
+
+    destroy() {
+        this.elem.off('reload', this.refetch_events);
+        this.calendar.destroy();
+        this.calendar = null;
+        $(window).off('resize', this.on_resize);
     }
 }
