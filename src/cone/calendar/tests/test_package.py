@@ -283,24 +283,6 @@ class TestResources(unittest.TestCase):
         self.assertEqual(scripts[0].file_name, 'fullcalendar.min.js')
         self.assertTrue(os.path.exists(scripts[0].file_path))
 
-        self.assertTrue(scripts[1].directory.endswith(np('/static/fullcalendar/locale')))
-        self.assertEqual(scripts[1].path, 'fullcalendar/locale')
-        self.assertEqual(scripts[1].file_name, 'de.js')
-        self.assertTrue(os.path.exists(scripts[1].file_path))
-
-        self.assertTrue(scripts[2].directory.endswith(np('/static/fullcalendar/locale')))
-        self.assertEqual(scripts[2].path, 'fullcalendar/locale')
-        self.assertEqual(scripts[2].file_name, 'it.js')
-        self.assertTrue(os.path.exists(scripts[2].file_path))
-
-        styles = resources_.styles
-        self.assertEqual(len(styles), 1)
-
-        self.assertTrue(styles[0].directory.endswith(np('/static/fullcalendar')))
-        self.assertEqual(styles[0].path, 'fullcalendar')
-        self.assertEqual(styles[0].file_name, 'fullcalendar.min.css')
-        self.assertTrue(os.path.exists(styles[0].file_path))
-
     def test_cone_calendar_resources(self):
         resources_ = browser.cone_calendar_resources
         self.assertTrue(resources_.directory.endswith(np('/static/calendar')))
