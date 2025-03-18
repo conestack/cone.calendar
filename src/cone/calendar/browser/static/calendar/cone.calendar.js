@@ -69,9 +69,7 @@ var cone_calendar = (function (exports, $) {
             this.on_resize = this.on_resize.bind(this);
             $(window).on('resize', this.on_resize);
             this.on_resize();
-            if (window.ts !== undefined) {
-                window.ts.ajax.attach(this, elem);
-            }
+            window.ts.ajax.attach(this, elem);
         }
         refetch_events() {
             calendar.refetchEvents();

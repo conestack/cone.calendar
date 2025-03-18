@@ -78,9 +78,7 @@ export class Calendar {
         $(window).on('resize', this.on_resize);
         this.on_resize();
 
-        if (window.ts !== undefined) {
-            window.ts.ajax.attach(this, elem);
-        }
+        window.ts.ajax.attach(this, elem);
     }
 
     refetch_events() {
@@ -124,7 +122,6 @@ export class Calendar {
             .attr('class', 'calendar-contextmenu-wrapper')
             .css('height', body.height() + 'px');
         body.append(wrapper);
-        // XXX: when does this happen
         wrapper.on('click contextmenu', function(e) {
             e.preventDefault();
             wrapper.remove();
