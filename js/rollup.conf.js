@@ -67,7 +67,7 @@ export default args => {
     conf.push(scss_bs5);
 
     let bundle_fullcalendar = {
-        input: 'js/src/fullcalendar_bundle.js',
+        input: 'js/src/fullcalendar.js',
         plugins: [
             resolve(),
             cleanup()
