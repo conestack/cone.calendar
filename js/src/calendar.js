@@ -117,6 +117,9 @@ export class Calendar {
     }
 
     create_context_menu(actions, x, y) {
+        if (this.menu) {
+            this.menu.remove();
+        }
         let body = $('body', document);
         let wrapper = $('<div />')
             .attr('class', 'calendar-contextmenu-wrapper')
@@ -126,11 +129,16 @@ export class Calendar {
             e.preventDefault();
             wrapper.remove();
         });
-        let menu = $('<ul />')
-            .attr('class', 'calendar-contextmenu dropdown-menu')
+        let menu = $('<ul>')
+            .addClass(
+                'calendar-contextmenu dropdown-menu list-group ' +
+                'list-group-flush p-0 rounded shadow'
+            )
+            .css('position', 'absolute')
             .css('left', x + 'px')
             .css('top', y + 'px')
             .css('display', 'block');
+        this.menu = menu;
         wrapper.append(menu);
         for (let i in actions) {
             this.add_menu_item(wrapper, menu, actions[i]);
@@ -138,10 +146,11 @@ export class Calendar {
     }
 
     add_menu_item(wrapper, menu, action) {
-        let menu_item = $('<li><span />' + action.title + '</li>');
+        const menu_item = $('<li>').addClass('list-group-item list-group-item-action');
         if (action.icon) {
-            $('span', menu_item).attr('class', action.icon);
+            $(`<i class="${action.icon} me-2"></i>`).appendTo(menu_item);
         }
+        $(`<span>${action.title}</span>`).appendTo(menu_item);
         menu.append(menu_item);
         menu_item.on('click', function(e) {
             e.stopPropagation();

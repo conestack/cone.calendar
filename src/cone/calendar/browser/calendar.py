@@ -238,7 +238,7 @@ class CalendarEvents(JSONView):
             'target': 'https://example.com/path/to/event',
             'actions': [{
                 'title': 'Edit',
-                'icon': 'glyphicons glyphicons-pencil',
+                'icon': 'bi bi-pencil',
                 'target': 'https://example.com/path/to/event?param=value',
                 'overlay': {
                     'action': 'overlayedit',
@@ -248,7 +248,7 @@ class CalendarEvents(JSONView):
                 }
             }, {
                 'title': 'Delete',
-                'icon': 'glyphicons glyphicons-remove-circle',
+                'icon': 'bi bi-x-circle',
                 'confirm': 'Do you really want to delete this event?',
                 'action': {
                     'name': 'delete',
