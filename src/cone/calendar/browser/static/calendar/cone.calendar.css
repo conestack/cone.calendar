@@ -1,1 +1,1 @@
-#calendar button.btn-primary{color:var(--bs-white)}@media(max-width:700px){#calendar{font-size:.75em}#calendar div.fc-header-toolbar.fc-toolbar div.fc-toolbar-chunk button{font-size:12px}}.calendar-contextmenu li{cursor:pointer}
+#calendar button.btn-primary{color:var(--bs-white)}@media(max-width:700px){#calendar{font-size:.75em}#calendar div.fc-header-toolbar.fc-toolbar div.fc-toolbar-chunk button{font-size:12px}}.calendar-contextmenu li{cursor:pointer;white-space:nowrap}

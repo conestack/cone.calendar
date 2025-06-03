@@ -66,6 +66,7 @@ export class Calendar {
             themeSystem: 'bootstrap5',
             height: 'auto'
         });
+        this.close_on_outside_click = this.close_on_outside_click.bind(this);
         const calendar = this.calendar = new fullcalendar.Calendar(
             this.elem.get(0),
             options
@@ -116,33 +117,72 @@ export class Calendar {
         });
     }
 
-    create_context_menu(actions, x, y) {
-        if (this.menu) {
-            this.menu.remove();
+    close_on_outside_click() {
+        const handler = (event) => {
+            const path = event.composedPath();
+            if (!path.includes(this.menu)) {
+                this.menu.remove();
+                document.removeEventListener('click', handler);
+            }
         }
-        let body = $('body', document);
-        let wrapper = $('<div />')
+        // delay adding listener to avoid immediately catching the open click
+        setTimeout(() => {
+            document.addEventListener('click', handler);
+        });
+    }
+
+    create_context_menu(actions, x, y) {
+        const body = $('body', document);
+        const wrapper = $('<div />')
             .attr('class', 'calendar-contextmenu-wrapper')
             .css('height', body.height() + 'px');
         body.append(wrapper);
-        wrapper.on('click contextmenu', function(e) {
+        wrapper.on('click contextmenu', function (e) {
             e.preventDefault();
             wrapper.remove();
         });
-        let menu = $('<ul>')
+
+        const menu = $('<ul>')
             .addClass(
                 'calendar-contextmenu dropdown-menu list-group ' +
                 'list-group-flush p-0 rounded shadow'
             )
-            .css('position', 'absolute')
-            .css('left', x + 'px')
-            .css('top', y + 'px')
-            .css('display', 'block');
-        this.menu = menu;
-        wrapper.append(menu);
+            .css({ // measure menu dimensions off viewport
+                position: 'absolute',
+                left: '-9999px',
+                top: '-9999px',
+                visibility: 'hidden',
+                display: 'block'
+            });
+        body.append(menu);
+
         for (let i in actions) {
             this.add_menu_item(wrapper, menu, actions[i]);
         }
+
+        // calculate left/right alignment
+        const menu_width = menu.outerWidth();
+        const viewport_width = $(window).width();
+
+        let final_left;
+        if (x + menu_width > viewport_width) {
+            final_left = x - menu_width;
+            if (final_left < 0) {
+                final_left = 0;
+            }
+        } else {
+            final_left = x;
+        }
+
+        menu.css({
+            left: final_left + 'px',
+            top: y + 'px',
+            visibility: 'visible'
+        });
+
+        this.menu = menu;
+        wrapper.append(menu);
+        this.close_on_outside_click();
     }
 
     add_menu_item(wrapper, menu, action) {
