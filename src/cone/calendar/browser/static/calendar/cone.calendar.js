@@ -310,7 +310,9 @@ var cone_calendar = (function (exports, $) {
             this.elem.off('reload', this.refetch_events);
             this.calendar.destroy();
             this.calendar = null;
-            this.wrapper.remove();
+            if (this.wrapper) {
+                this.wrapper.remove();
+            }
             $(window).off('resize', this.on_resize);
         }
     }
