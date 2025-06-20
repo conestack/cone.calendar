@@ -117,7 +117,10 @@ var cone_calendar = (function (exports, $) {
         }
         create_context_menu(actions, x, y) {
             const body = $('body', document);
-            const wrapper = $('<div />')
+            if (this.wrapper) {
+                this.wrapper.remove();
+            }
+            const wrapper = this.wrapper = $('<div />')
                 .attr('class', 'calendar-contextmenu-wrapper')
                 .css('height', body.height() + 'px');
             body.append(wrapper);
@@ -307,6 +310,7 @@ var cone_calendar = (function (exports, $) {
             this.elem.off('reload', this.refetch_events);
             this.calendar.destroy();
             this.calendar = null;
+            this.wrapper.remove();
             $(window).off('resize', this.on_resize);
         }
     }
