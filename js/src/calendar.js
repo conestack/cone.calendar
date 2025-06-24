@@ -56,6 +56,7 @@ export class Calendar {
             dateClick: this.date_clicked.bind(this),
             eventDrop: this.event_drop.bind(this),
             eventResize: this.event_resize.bind(this),
+            timeZone: 'UTC',
             plugins: [
                 fullcalendar.bootstrap5Plugin,
                 fullcalendar.dayGridPlugin,
@@ -83,7 +84,7 @@ export class Calendar {
     }
 
     refetch_events() {
-        calendar.refetchEvents();
+        this.calendar.refetchEvents();
     }
 
     on_resize(evt) {
@@ -235,7 +236,7 @@ export class Calendar {
                 selector: action.action.selector,
                 mode: action.action.mode,
                 url: target.url,
-                params: target.params
+                    params: target.params
             });
         }
         if (action.event) {
@@ -288,8 +289,8 @@ export class Calendar {
             view: info.view.name
         };
         this.handle_actions(
-            info.event.actions,
-            info.event.target,
+            info.event.extendedProps.actions,
+            info.event.extendedProps.target,
             params,
             e.pageX,
             e.pageY
@@ -299,11 +300,12 @@ export class Calendar {
     date_clicked(info) {
         const e = info.jsEvent;
         const date = info.date;
-        // XXX: docs say date is JS DateTime, but it's not?
+        const timestamp = Math.floor(date.getTime() / 1000);
+
         let params = {
-            date: Math.floor(date.getTime() / 1000),
+            date: timestamp,
             all_day: date.allDay,
-            view: info.view.name
+            view: info.view.type
         };
         this.handle_actions(
             this.actions,
