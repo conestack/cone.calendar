@@ -49,6 +49,21 @@ var cone_calendar = (function (exports, $) {
                 dateClick: this.date_clicked.bind(this),
                 eventDrop: this.event_drop.bind(this),
                 eventResize: this.event_resize.bind(this),
+                moreLinkDidMount(arg) {
+                    arg.el.addEventListener('click', () => {
+                        setTimeout(() => {
+                            const popover = $('.fc-popover');
+                            if (popover) {
+                                const w = elem.outerWidth(),
+                                      pw = popover.outerWidth(),
+                                      pl = parseInt(popover.css('left'));
+                                if (pl + pw > w) {
+                                    popover.css('transform', 'translateX(-100%)');
+                                }
+                            }
+                        }, 0);
+                    });
+                },
                 timeZone: 'UTC',
                 plugins: [
                     fullcalendar.bootstrap5Plugin,
@@ -70,6 +85,8 @@ var cone_calendar = (function (exports, $) {
             calendar.render();
             this.on_resize = this.on_resize.bind(this);
             $(window).on('resize', this.on_resize);
+            cone.global_events.on('on_sidebar_left_resize', this.on_resize);
+            cone.global_events.on('on_sidebar_right_resize', this.on_resize);
             this.on_resize();
             window.ts.ajax.attach(this, elem);
         }
@@ -82,6 +99,12 @@ var cone_calendar = (function (exports, $) {
                 this.calendar.setOption('height', 'auto');
             } else if (width > 700 && (this._window_width <= 700 || !evt)) {
                 this.calendar.setOption('height', undefined);
+            }
+            this.calendar.updateSize();
+            if (this.elem.outerWidth() <= 700) {
+                this.calendar.setOption('dayMaxEventRows', 0);
+            } else {
+                this.calendar.setOption('dayMaxEventRows', 3);
             }
             this._window_width = width;
         }
@@ -107,7 +130,10 @@ var cone_calendar = (function (exports, $) {
         close_on_outside_click() {
             const handler = (event) => {
                 const path = event.composedPath();
-                if (!path.includes(this.menu)) {
+                const inside_event = path.some(el =>
+                    el.classList && el.classList.contains('fc-event')
+                );
+                if (!path.includes(this.menu) && !inside_event) {
                     this.menu.remove();
                     document.removeEventListener('click', handler);
                 }
@@ -316,6 +342,8 @@ var cone_calendar = (function (exports, $) {
                 this.wrapper.remove();
             }
             $(window).off('resize', this.on_resize);
+            cone.global_events.off('on_sidebar_left_resize', this.on_resize);
+            cone.global_events.off('on_sidebar_right_resize', this.on_resize);
         }
     }
 

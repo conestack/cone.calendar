@@ -1,4 +1,6 @@
 #calendar {
+    max-height: calc(100vh - 13rem);
+
     button.btn-primary {
         color: var(--bs-white);
     }
@@ -16,7 +18,11 @@
     }
 }
 
-.calendar-contextmenu li {
-    cursor: pointer;
-    white-space: nowrap;
+.calendar-contextmenu {
+    z-index: 10000; // required for small viewport: fullcalendar renders dropdown
+
+    li {
+        cursor: pointer;
+        white-space: nowrap;
+    }
 }
