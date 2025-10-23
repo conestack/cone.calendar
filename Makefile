@@ -91,7 +91,7 @@ PRIMARY_PYTHON?=python3
 
 # Minimum required Python version.
 # Default: 3.9
-PYTHON_MIN_VERSION?=3.9
+PYTHON_MIN_VERSION?=3.10
 
 # Install packages using the given package installer method.
 # Supported are `pip` and `uv`. If uv is used, its global availability is
@@ -128,7 +128,7 @@ VENV_FOLDER?=venv
 
 # mxdev to install in virtual environment.
 # Default: mxdev
-MXDEV?=mxdev
+MXDEV?=mxdev==4.1.1
 
 # mxmake to install in virtual environment.
 # Default: mxmake

@@ -338,19 +338,3 @@ class TestResources(unittest.TestCase):
         self.assertEqual(styles[0].path, 'calendar')
         self.assertEqual(styles[0].file_name, 'cone.calendar.css')
         self.assertTrue(os.path.exists(styles[0].file_path))
-
-
-def run_tests():
-    from cone.calendar import tests
-    from zope.testrunner.runner import Runner
-
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.findTestCases(tests))
-
-    runner = Runner(found_suites=[suite])
-    runner.run()
-    sys.exit(int(runner.failed))
-
-
-if __name__ == '__main__':
-    run_tests()

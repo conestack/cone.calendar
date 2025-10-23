@@ -27,7 +27,8 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
-    "zope.testrunner",
+    "pytest",
+    "zope.pytestlayer",
 ]
 
 [project.urls]
@@ -35,5 +36,11 @@ Homepage = "http://github.com/conestack/cone.calendar"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/cone"]
+
+[tool.pytest.ini_options]
+consider_namespace_packages = true
+addopts = ["--import-mode=importlib"]
+pythonpath = "src"
+
 [tool.zest-releaser]
 create-wheel = true
