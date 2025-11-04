@@ -21,8 +21,8 @@ classifiers = [
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
 ]
 dependencies = [
-    "cone.app",
-    "yafowil.widget.cron",
+    "cone.app>1.0.99,<2.0.0",
+    "yafowil.widget.cron>1.99",
 ]
 
 [project.optional-dependencies]
