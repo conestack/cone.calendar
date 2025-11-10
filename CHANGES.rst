@@ -1,8 +1,11 @@
 Changes
 =======
 
-1.0a2 (unreleased)
+1.1.0 (unreleased)
 ------------------
+
+- Refactor package layout to use ``pyproject.toml`` and implecit namespace packages.
+  [rnix]
 
 - Setup Makefile.
   [lenadax]

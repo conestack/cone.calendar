@@ -1,14 +1,14 @@
-.python-version
 *.egg-info
 *.pyc
 *.pyo
+.coverage
+.python-version
 /.mxmake/
 /.project
-/.venv/
 /.vscode/
+/build/
 /constraints-mxdev.txt
 /coverage/
-.coverage
 /dist/
 /node_modules/
 /package-lock.json
