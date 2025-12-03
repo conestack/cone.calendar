@@ -1,4 +1,4 @@
-name: Test cone.calendar
+name: Python Tests
 
 on: [push]
 
