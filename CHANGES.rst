@@ -4,7 +4,7 @@ Changes
 1.1.0 (unreleased)
 ------------------
 
-- Refactor package layout to use ``pyproject.toml`` and implecit namespace packages.
+- Refactor package layout to use ``pyproject.toml`` and implicit namespace packages.
   [rnix]
 
 - Setup Makefile.
@@ -18,6 +18,13 @@ Changes
 ------------------
 
 - Use ``webresource`` for resource registration.
+  [rnix]
+
+
+0.4 (2025-10-25)
+----------------
+
+- Pin upper versions of dependencies.
   [rnix]
 
 

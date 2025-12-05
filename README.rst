@@ -6,11 +6,9 @@
     :target: https://pypi.python.org/pypi/cone.calendar
     :alt: Number of PyPI downloads
 
-.. image:: https://travis-ci.org/bluedynamics/cone.calendar.svg?branch=master
-    :target: https://travis-ci.org/bluedynamics/cone.calendar
-
-.. image:: https://coveralls.io/repos/github/bluedynamics/cone.calendar/badge.svg?branch=master
-    :target: https://coveralls.io/github/bluedynamics/cone.calendar?branch=master
+.. image:: https://github.com/conestack/cone.calendar/actions/workflows/test.yml/badge.svg
+    :target: https://github.com/conestack/cone.calendar/actions/workflows/test.yml
+    :alt: Test cone.calendar
 
 
 This package provides a calendar integration in to cone.app.
