@@ -45,12 +45,12 @@ class CalendarTile(Tile):
         file.
 
     ``calendar_header``:
-        Corresponds to ``header`` option passed to fullcalendar.
+        Corresponds to ``headerToolbar`` option passed to fullcalendar.
 
         See https://fullcalendar.io/docs/v3/header
 
     ``calendar_footer``:
-        Corresponds to ``footer`` option passed to fullcalendar.
+        Corresponds to ``footerToolbar`` option passed to fullcalendar.
 
         See https://fullcalendar.io/docs/v3/footer
 
@@ -69,7 +69,7 @@ class CalendarTile(Tile):
 
         See https://fullcalendar.io/docs/v3/weekNumbers
 
-    ``calendar_week_numbers_within_days``:
+    ``calendar_week_number_calculation``:
         Corresponds to ``weekNumbersWithinDays`` option passed to fullcalendar.
 
         See https://fullcalendar.io/docs/v3/weekNumbersWithinDays
@@ -109,12 +109,12 @@ class CalendarTile(Tile):
     show_contextmenu = False
     option_mapping = {
         'calendar_locale': 'locale',
-        'calendar_header': 'header',
-        'calendar_footer': 'footer',
+        'calendar_header': 'headerToolbar',
+        'calendar_footer': 'footerToolbar',
         'calendar_first_day': 'firstDay',
         'calendar_weekends': 'weekends',
         'calendar_week_numbers': 'weekNumbers',
-        'calendar_week_numbers_within_days': 'weekNumbersWithinDays',
+        'calendar_week_number_calculation': 'weekNumberCalculation',
         'calendar_business_hours': 'businessHours'
     }
     default_options = {
@@ -238,7 +238,7 @@ class CalendarEvents(JSONView):
             'target': 'https://example.com/path/to/event',
             'actions': [{
                 'title': 'Edit',
-                'icon': 'glyphicons glyphicons-pencil',
+                'icon': 'bi bi-pencil',
                 'target': 'https://example.com/path/to/event?param=value',
                 'overlay': {
                     'action': 'overlayedit',
@@ -248,7 +248,7 @@ class CalendarEvents(JSONView):
                 }
             }, {
                 'title': 'Delete',
-                'icon': 'glyphicons glyphicons-remove-circle',
+                'icon': 'bi bi-x-circle',
                 'confirm': 'Do you really want to delete this event?',
                 'action': {
                     'name': 'delete',
