@@ -9,14 +9,20 @@ var cone_calendar = (function (exports, $) {
             Object.assign(this, opts);
             this.events = this.events.bind(this);
         }
-        events(start, end, timezone, callback) {
-            let calendar = this._calendar,
-                url = calendar.target + '/' + this._events_view;
+        events(info, successCallback, failureCallback) {
+            let calendar = this._calendar;
+            let url = calendar.target + '/' + this._events_view;
             let params = {
-                start: start.unix(),
-                end: end.unix()
+                start: Math.floor(info.start.getTime() / 1000),
+                end: Math.floor(info.end.getTime() / 1000),
+                timezone: info.timeZone || 'local'
             };
-            calendar.json_request(url, params, callback, null);
+            calendar.json_request(url, params, (events) => {
+                successCallback(events);
+            }, (error) => {
+                console.error('Error fetching events:', error);
+                failureCallback(error);
+            });
         }
     }
     class Calendar {
@@ -40,14 +46,67 @@ var cone_calendar = (function (exports, $) {
             $.extend(options, {
                 eventSources: event_sources,
                 eventClick: this.event_clicked.bind(this),
-                dayClick: this.day_clicked.bind(this),
+                dateClick: this.date_clicked.bind(this),
                 eventDrop: this.event_drop.bind(this),
-                eventResize: this.event_resize.bind(this)
+                eventResize: this.event_resize.bind(this),
+                moreLinkDidMount(arg) {
+                    arg.el.addEventListener('click', () => {
+                        setTimeout(() => {
+                            const popover = $('.fc-popover');
+                            if (popover) {
+                                const w = elem.outerWidth(),
+                                      pw = popover.outerWidth(),
+                                      pl = parseInt(popover.css('left'));
+                                if (pl + pw > w) {
+                                    popover.css('transform', 'translateX(-100%)');
+                                }
+                            }
+                        }, 0);
+                    });
+                },
+                timeZone: 'UTC',
+                plugins: [
+                    fullcalendar.bootstrap5Plugin,
+                    fullcalendar.dayGridPlugin,
+                    fullcalendar.timeGridPlugin,
+                    fullcalendar.listPlugin,
+                    fullcalendar.interactionPlugin
+                ],
+                themeSystem: 'bootstrap5',
+                height: 'auto'
             });
-            elem.bind('reload', function() {
-                elem.fullCalendar('refetchEvents');
-            });
-            elem.fullCalendar(options);
+            this.close_on_outside_click = this.close_on_outside_click.bind(this);
+            const calendar = this.calendar = new fullcalendar.Calendar(
+                this.elem.get(0),
+                options
+            );
+            this.refetch_events = this.refetch_events.bind(this);
+            this.elem.on('reload', this.refetch_events);
+            calendar.render();
+            this.on_resize = this.on_resize.bind(this);
+            $(window).on('resize', this.on_resize);
+            cone.global_events.on('on_sidebar_left_resize', this.on_resize);
+            cone.global_events.on('on_sidebar_right_resize', this.on_resize);
+            this.on_resize();
+            window.ts.ajax.attach(this, elem);
+        }
+        refetch_events() {
+            this.calendar.refetchEvents();
+        }
+        on_resize(evt) {
+            const width = $(window).width();
+            if (width <= 700 && (this._window_width > 700 || !evt)) {
+                this.calendar.setOption('height', 'auto');
+            } else if (width > 700 && (this._window_width <= 700 || !evt)) {
+                this.calendar.setOption('height', undefined);
+            }
+            this.calendar.updateSize();
+            if (this.elem.outerWidth() <= 700) {
+                this.calendar.setOption('dayMaxEventRows', 0);
+            } else {
+                this.calendar.setOption('dayMaxEventRows', 3);
+            }
+            this._window_width = width;
         }
         json_request(url, params, callback, errback) {
             bdajax.request({
@@ -68,31 +127,76 @@ var cone_calendar = (function (exports, $) {
                 }
             });
         }
+        close_on_outside_click() {
+            const handler = (event) => {
+                const path = event.composedPath();
+                const inside_event = path.some(el =>
+                    el.classList && el.classList.contains('fc-event')
+                );
+                if (!path.includes(this.menu) && !inside_event) {
+                    this.menu.remove();
+                    document.removeEventListener('click', handler);
+                }
+            };
+            setTimeout(() => {
+                document.addEventListener('click', handler);
+            });
+        }
         create_context_menu(actions, x, y) {
-            let body = $('body', document);
-            let wrapper = $('<div />')
+            const body = $('body', document);
+            if (this.wrapper) {
+                this.wrapper.remove();
+            }
+            const wrapper = this.wrapper = $('<div />')
                 .attr('class', 'calendar-contextmenu-wrapper')
                 .css('height', body.height() + 'px');
             body.append(wrapper);
-            wrapper.on('click contextmenu', function(e) {
+            wrapper.on('click contextmenu', function (e) {
                 e.preventDefault();
                 wrapper.remove();
             });
-            let menu = $('<ul />')
-                .attr('class', 'calendar-contextmenu dropdown-menu')
-                .css('left', x + 'px')
-                .css('top', y + 'px')
-                .css('display', 'block');
-            wrapper.append(menu);
+            const menu = $('<ul>')
+                .addClass(
+                    'calendar-contextmenu dropdown-menu list-group ' +
+                    'list-group-flush p-0 rounded shadow'
+                )
+                .css({
+                    position: 'absolute',
+                    left: '-9999px',
+                    top: '-9999px',
+                    visibility: 'hidden',
+                    display: 'block'
+                });
+            body.append(menu);
             for (let i in actions) {
                 this.add_menu_item(wrapper, menu, actions[i]);
             }
+            const menu_width = menu.outerWidth();
+            const viewport_width = $(window).width();
+            let final_left;
+            if (x + menu_width > viewport_width) {
+                final_left = x - menu_width;
+                if (final_left < 0) {
+                    final_left = 0;
+                }
+            } else {
+                final_left = x;
+            }
+            menu.css({
+                left: final_left + 'px',
+                top: y + 'px',
+                visibility: 'visible'
+            });
+            this.menu = menu;
+            wrapper.append(menu);
+            this.close_on_outside_click();
         }
         add_menu_item(wrapper, menu, action) {
-            let menu_item = $('<li><span />' + action.title + '</li>');
+            const menu_item = $('<li>').addClass('list-group-item list-group-item-action');
             if (action.icon) {
-                $('span', menu_item).attr('class', action.icon);
+                $(`<i class="${action.icon} me-2"></i>`).appendTo(menu_item);
             }
+            $(`<span>${action.title}</span>`).appendTo(menu_item);
             menu.append(menu_item);
             menu_item.on('click', function(e) {
                 e.stopPropagation();
@@ -129,7 +233,7 @@ var cone_calendar = (function (exports, $) {
                     selector: action.action.selector,
                     mode: action.action.mode,
                     url: target.url,
-                    params: target.params
+                        params: target.params
                 });
             }
             if (action.event) {
@@ -170,37 +274,41 @@ var cone_calendar = (function (exports, $) {
             }
             this.create_context_menu(actions, x, y);
         }
-        event_clicked(cal_evt, js_evt, view) {
+        event_clicked(info) {
+            const e = info.jsEvent;
             let params = {
-                view: view.name
+                view: info.view.name
             };
             this.handle_actions(
-                cal_evt.actions,
-                cal_evt.target,
+                info.event.extendedProps.actions,
+                info.event.extendedProps.target,
                 params,
-                js_evt.pageX,
-                js_evt.pageY
+                e.pageX,
+                e.pageY
             );
         }
-        day_clicked(date, js_evt, view) {
+        date_clicked(info) {
+            const e = info.jsEvent;
+            const date = info.date;
+            const timestamp = Math.floor(date.getTime() / 1000);
             let params = {
-                date: date.unix(),
-                all_day: !date.hasTime(),
-                view: view.name
+                date: timestamp,
+                all_day: date.allDay,
+                view: info.view.type
             };
             this.handle_actions(
                 this.actions,
                 this.target,
                 params,
-                js_evt.pageX,
-                js_evt.pageY
+                e.pageX,
+                e.pageY
             );
         }
         update_event(cal_evt, delta, revert_func, view, callback) {
             let target = this.prepare_target(cal_evt.target, {
                 id: cal_evt.id,
-                start: cal_evt.start.unix(),
-                end: cal_evt.end.unix(),
+                start: Math.floor(cal_evt.start.getTime() / 1000),
+                end: Math.floor(cal_evt.end.getTime() / 1000),
                 delta: delta.asSeconds()
             });
             let url = target.url + '/' + view;
@@ -225,6 +333,17 @@ var cone_calendar = (function (exports, $) {
                 console.log(data);
             };
             this.update_event(cal_evt, delta, revert_func, view, cb);
+        }
+        destroy() {
+            this.elem.off('reload', this.refetch_events);
+            this.calendar.destroy();
+            this.calendar = null;
+            if (this.wrapper) {
+                this.wrapper.remove();
+            }
+            $(window).off('resize', this.on_resize);
+            cone.global_events.off('on_sidebar_left_resize', this.on_resize);
+            cone.global_events.off('on_sidebar_right_resize', this.on_resize);
         }
     }
 
