@@ -107,6 +107,7 @@ class CalendarTile(Tile):
         ``CalendarTile.default_actions`` is used.
     """
     show_contextmenu = False
+    editable = False
     option_mapping = {
         'calendar_locale': 'locale',
         'calendar_header': 'headerToolbar',
@@ -133,14 +134,14 @@ class CalendarTile(Tile):
 
     @property
     def options(self):
-        options = {}
+        options = {'editable': self.editable}
         for prop_name, option_name in self.option_mapping.items():
             value = getattr(self.model.properties, prop_name)
             if value is None:
                 value = self.default_options.get(prop_name)
             if value is not None:
                 options[option_name] = value
-        return json.dumps(options, sort_keys=True) if options else None
+        return json.dumps(options, sort_keys=True)
 
     @property
     def sources(self):

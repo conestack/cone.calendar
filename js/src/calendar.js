@@ -345,36 +345,36 @@ export class Calendar {
     }
 
     update_event(cal_evt, delta, revert_func, view, callback) {
-        let target = this.prepare_target(cal_evt.target, {
+        let target = this.prepare_target(cal_evt.extendedProps.target, {
             id: cal_evt.id,
             start: Math.floor(cal_evt.start.getTime() / 1000), // cal_evt.start.unix(),
             end: Math.floor(cal_evt.end.getTime() / 1000), // cal_evt.end.unix(),
-            delta: delta.asSeconds()
-        })
+            delta: Math.round((delta.days * 86400000 + delta.milliseconds) / 1000) // moment.js dropped in v5
+        });
         let url = target.url + '/' + view;
         this.json_request(url, target.params, callback, revert_func);
     }
 
-    event_drop(cal_evt, delta, revert_func) {
-        if (!cal_evt.editable && !cal_evt.startEditable) {
+    event_drop(info) {
+        if (!info.event.editable && !info.event.startEditable) {
             return;
         }
-        let view = 'calendar_event_drop'
+        let view = 'calendar_event_drop';
         let cb = function(data) {
             console.log(data);
         }
-        this.update_event(cal_evt, delta, revert_func, view, cb);
+        this.update_event(info.event, info.delta, info.revert, view, cb);
     }
 
-    event_resize(cal_evt, delta, revert_func) {
-        if (!cal_evt.editable && !cal_evt.durationEditable) {
+    event_resize(info) {
+        if (!info.event.editable && !info.event.durationEditable) {
             return;
         }
-        let view = 'calendar_event_resize'
+        let view = 'calendar_event_resize';
         let cb = function(data) {
             console.log(data);
         }
-        this.update_event(cal_evt, delta, revert_func, view, cb);
+        this.update_event(info.event, info.endDelta, info.revert, view, cb);
     }
 
     destroy() {
