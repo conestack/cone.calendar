@@ -52,7 +52,7 @@ class TestCalendarTile(TileTestCase):
         <div class="card card-body mt-3">
           <div id="calendar"
                data-calendar_target='http://example.com/calendar'
-               data-calendar_options='{"locale": "en"}'
+               data-calendar_options='{"editable": false, "locale": "en"}'
                data-calendar_sources='[{"events": "calendar_events"}]'
                data-calendar_actions='[]'></div>
         </div>
@@ -85,7 +85,10 @@ class TestCalendarTile(TileTestCase):
             'calendar_locale': 'en'
         })
         self.assertTrue(isinstance(calendar.options, str))
-        self.assertEqual(json.loads(calendar.options), {'locale': 'en'})
+        self.assertEqual(json.loads(calendar.options), {
+            'editable': False,
+            'locale': 'en'
+        })
 
         properties = calendar.model.properties
         properties.calendar_locale = 'de'
@@ -110,6 +113,7 @@ class TestCalendarTile(TileTestCase):
         }]
         self.assertEqual(json.loads(calendar.options), {
             'locale': 'de',
+            'editable': False,
             'headerToolbar': {
                 'left': 'title',
                 'center': 'today',
