@@ -88,6 +88,7 @@ var cone_calendar = (function (exports, $) {
             cone.global_events.on('on_sidebar_left_resize', this.on_resize);
             cone.global_events.on('on_sidebar_right_resize', this.on_resize);
             this.on_resize();
+            this.elem.data('cone.calendar', this);
             window.ts.ajax.attach(this, elem);
         }
         refetch_events() {
@@ -315,9 +316,6 @@ var cone_calendar = (function (exports, $) {
             this.json_request(url, target.params, callback, revert_func);
         }
         event_drop(info) {
-            if (!info.event.editable && !info.event.startEditable) {
-                return;
-            }
             let view = 'calendar_event_drop';
             let cb = function(data) {
                 console.log(data);
@@ -325,9 +323,6 @@ var cone_calendar = (function (exports, $) {
             this.update_event(info.event, info.delta, info.revert, view, cb);
         }
         event_resize(info) {
-            if (!info.event.editable && !info.event.durationEditable) {
-                return;
-            }
             let view = 'calendar_event_resize';
             let cb = function(data) {
                 console.log(data);
@@ -344,6 +339,7 @@ var cone_calendar = (function (exports, $) {
             $(window).off('resize', this.on_resize);
             cone.global_events.off('on_sidebar_left_resize', this.on_resize);
             cone.global_events.off('on_sidebar_right_resize', this.on_resize);
+            this.elem.data('cone.calendar', null);
         }
     }
 
