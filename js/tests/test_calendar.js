@@ -1097,7 +1097,11 @@ QUnit.module('cone.calendar.Calendar.event_drop', hooks => {
             update_called = true;
         };
 
-        calendar.event_drop({editable: false, startEditable: false}, {}, () => {});
+        calendar.event_drop({
+            event: {editable: false, startEditable: false},
+            delta: {}, 
+            revert: () => {}}
+        );
 
         assert.false(update_called, 'update_event not called');
     });
@@ -1119,7 +1123,11 @@ QUnit.module('cone.calendar.Calendar.event_drop', hooks => {
         };
 
         let delta = {asSeconds: () => 3600};
-        calendar.event_drop({editable: true}, delta, () => {});
+        calendar.event_drop({
+            event: {editable: true},
+            delta: delta,
+            revert: () => {}}
+        );
 
         assert.ok(update_args, 'update_event called');
         assert.strictEqual(update_args.view, 'calendar_event_drop', 'correct view');
@@ -1142,7 +1150,11 @@ QUnit.module('cone.calendar.Calendar.event_drop', hooks => {
         };
 
         let delta = {asSeconds: () => 3600};
-        calendar.event_drop({editable: false, startEditable: true}, delta, () => {});
+        calendar.event_drop({
+            event: {editable: false, startEditable: true},
+            delta: delta,
+            revert: () => {}}
+        );
 
         assert.true(update_called, 'update_event called with startEditable');
     });
@@ -1178,7 +1190,11 @@ QUnit.module('cone.calendar.Calendar.event_resize', hooks => {
             update_called = true;
         };
 
-        calendar.event_resize({editable: false, durationEditable: false}, {}, () => {});
+        calendar.event_drop({
+            event: {editable: false, durationEditable: false},
+            delta: {}, 
+            revert: () => {}}
+        );
 
         assert.false(update_called, 'update_event not called');
     });
@@ -1200,7 +1216,12 @@ QUnit.module('cone.calendar.Calendar.event_resize', hooks => {
         };
 
         let delta = {asSeconds: () => 1800};
-        calendar.event_resize({editable: true}, delta, () => {});
+
+        calendar.event_resize({
+            event: {editable: true},
+            delta: delta,
+            revert: () => {}}
+        );
 
         assert.ok(update_args, 'update_event called');
         assert.strictEqual(update_args.view, 'calendar_event_resize', 'correct view');
@@ -1243,9 +1264,9 @@ QUnit.module('cone.calendar.Calendar.update_event', hooks => {
             id: '123',
             start: start,
             end: end,
-            target: '/api/event/123'
+            extendedProps: {target: '/api/event/123'}
         };
-        let delta = {asSeconds: () => 3600};
+        let delta = {days: 0, milliseconds: 3600000};
 
         calendar.update_event(cal_evt, delta, () => {}, 'calendar_event_drop', () => {});
 
