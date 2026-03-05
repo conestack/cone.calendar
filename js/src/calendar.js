@@ -73,6 +73,10 @@ export class Calendar {
                     }, 0);
                 });
             },
+            eventDidMount(info) {
+                // supply event title for tooltip
+                info.el.title = info.event.title;
+            },
             timeZone: 'UTC',
             plugins: [
                 fullcalendar.bootstrap5Plugin,

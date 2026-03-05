@@ -116,7 +116,8 @@ class CalendarTile(Tile):
         'calendar_weekends': 'weekends',
         'calendar_week_numbers': 'weekNumbers',
         'calendar_week_number_calculation': 'weekNumberCalculation',
-        'calendar_business_hours': 'businessHours'
+        'calendar_business_hours': 'businessHours',
+        'event_overlap': 'slotEventOverlap'
     }
     default_options = {
         'calendar_locale': 'en'

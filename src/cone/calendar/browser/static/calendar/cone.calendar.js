@@ -64,6 +64,9 @@ var cone_calendar = (function (exports, $) {
                         }, 0);
                     });
                 },
+                eventDidMount(info) {
+                    info.el.title = info.event.title;
+                },
                 timeZone: 'UTC',
                 plugins: [
                     fullcalendar.bootstrap5Plugin,
