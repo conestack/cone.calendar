@@ -252,7 +252,8 @@ var cone_calendar = (function (exports, $) {
                     target: target,
                     selector: overlay.selector,
                     content_selector: overlay.content_selector,
-                    css: overlay.css
+                    css: overlay.css,
+                    title: overlay.title
                 });
             }
         }
