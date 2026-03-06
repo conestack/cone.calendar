@@ -80,6 +80,7 @@ class TestCalendarTile(TileTestCase):
             'calendar_week_number_calculation': 'weekNumberCalculation',
             'calendar_week_numbers': 'weekNumbers',
             'calendar_weekends': 'weekends',
+            'event_overlap': 'slotEventOverlap'
         })
         self.assertEqual(calendar.default_options, {
             'calendar_locale': 'en'

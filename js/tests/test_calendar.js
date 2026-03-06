@@ -1081,7 +1081,9 @@ QUnit.module('cone.calendar.Calendar.event_drop', hooks => {
         teardown_global_mocks();
     });
 
-    QUnit.test('event_drop does nothing if not editable', assert => {
+    QUnit.test('event_drop delegates editability guard to FullCalendar', assert => {
+        // FullCalendar prevents event_drop from being called for non-editable
+        // events; the handler itself always calls update_event when invoked.
         let elem = $(`
             <div id="calendar"
                  data-calendar_target="/api/calendar"
@@ -1099,11 +1101,11 @@ QUnit.module('cone.calendar.Calendar.event_drop', hooks => {
 
         calendar.event_drop({
             event: {editable: false, startEditable: false},
-            delta: {}, 
-            revert: () => {}}
-        );
+            delta: {},
+            revert: () => {}
+        });
 
-        assert.false(update_called, 'update_event not called');
+        assert.true(update_called, 'update_event called');
     });
 
     QUnit.test('event_drop calls update_event when editable', assert => {
@@ -1174,7 +1176,9 @@ QUnit.module('cone.calendar.Calendar.event_resize', hooks => {
         teardown_global_mocks();
     });
 
-    QUnit.test('event_resize does nothing if not editable', assert => {
+    QUnit.test('event_resize delegates editability guard to FullCalendar', assert => {
+        // FullCalendar prevents event_resize from being called for non-editable
+        // events; the handler itself always calls update_event when invoked.
         let elem = $(`
             <div id="calendar"
                  data-calendar_target="/api/calendar"
@@ -1190,13 +1194,13 @@ QUnit.module('cone.calendar.Calendar.event_resize', hooks => {
             update_called = true;
         };
 
-        calendar.event_drop({
+        calendar.event_resize({
             event: {editable: false, durationEditable: false},
-            delta: {}, 
-            revert: () => {}}
-        );
+            endDelta: {},
+            revert: () => {}
+        });
 
-        assert.false(update_called, 'update_event not called');
+        assert.true(update_called, 'update_event called');
     });
 
     QUnit.test('event_resize calls update_event when editable', assert => {
