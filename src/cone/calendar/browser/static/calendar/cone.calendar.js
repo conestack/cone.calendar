@@ -44,6 +44,7 @@ var cone_calendar = (function (exports, $) {
             }
             let options = elem.data('calendar_options');
             $.extend(options, {
+                locales: fullcalendar.localesAll,
                 eventSources: event_sources,
                 eventClick: this.event_clicked.bind(this),
                 dateClick: this.date_clicked.bind(this),
