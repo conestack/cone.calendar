@@ -282,6 +282,10 @@ var cone_calendar = (function (exports, $) {
         }
         event_clicked(info) {
             const e = info.jsEvent;
+            const popover_close = document.querySelector('.fc-popover-close');
+            if (popover_close) {
+                popover_close.click();
+            }
             let params = {
                 view: info.view.name
             };

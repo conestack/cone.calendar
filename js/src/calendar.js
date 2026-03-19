@@ -320,6 +320,12 @@ export class Calendar {
 
     event_clicked(info) {
         const e = info.jsEvent;
+        // Close fc-popover if event was clicked inside it so it doesn't
+        // obscure a treibstoff overlay (modal) opened by the action.
+        const popover_close = document.querySelector('.fc-popover-close');
+        if (popover_close) {
+            popover_close.click();
+        }
         let params = {
             view: info.view.name
         };
