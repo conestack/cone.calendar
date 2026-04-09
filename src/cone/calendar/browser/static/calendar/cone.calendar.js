@@ -67,6 +67,10 @@ var cone_calendar = (function (exports, $) {
                 },
                 eventDidMount(info) {
                     info.el.title = info.event.title;
+                    info.el._fc_event = info.event;
+                    if (info.event.extendedProps.target) {
+                        info.el.classList.add('fc-event-clickable');
+                    }
                 },
                 timeZone: 'UTC',
                 plugins: [

@@ -77,6 +77,12 @@ export class Calendar {
             eventDidMount(info) {
                 // supply event title for tooltip
                 info.el.title = info.event.title;
+                // expose fc event object for capture-phase click handlers
+                info.el._fc_event = info.event;
+                // mark events that carry an info overlay target
+                if (info.event.extendedProps.target) {
+                    info.el.classList.add('fc-event-clickable');
+                }
             },
             timeZone: 'UTC',
             plugins: [
