@@ -89,9 +89,9 @@ var cone_calendar = (function (exports, $) {
             }
         }
         add_menu_item(wrapper, menu, action) {
-            let menu_item = $('<li><span />' + action.title + '</li>');
+            let menu_item = $('<li><i style="padding-right:10px;"></i><span>' + action.title + '</span></li>');
             if (action.icon) {
-                $('span', menu_item).attr('class', action.icon);
+                $('i', menu_item).attr('class', action.icon);
             }
             menu.append(menu_item);
             menu_item.on('click', function(e) {
