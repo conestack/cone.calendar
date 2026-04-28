@@ -1,7 +1,7 @@
 Changes
 =======
 
-1.1.1 (unreleased)
+1.1.1 (2026-04-28)
 ------------------
 
 - Fix span tag receiving icon class in calendar contextmenu.
