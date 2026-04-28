@@ -4,7 +4,8 @@ Changes
 1.1.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix span tag receiving icon class in calendar contextmenu.
+  [lenadax]
 
 
 1.1.0 (2026-02-03)
