@@ -76,15 +76,6 @@ export default args => {
             file: `${out_dir_fullcalendar}/fullcalendar.js`,
             name: 'fullcalendar',
             format: 'iife',
-            globals: {
-                '@fullcalendar/core': 'FullCalendar',
-                '@fullcalendar/daygrid': 'FullCalendarDayGrid',
-                '@fullcalendar/timegrid': 'FullCalendarTimeGrid',
-                '@fullcalendar/list': 'FullCalendarList',
-                '@fullcalendar/interaction': 'FullCalendarInteraction',
-                '@fullcalendar/bootstrap5': 'FullCalendarBootstrap5',
-            },
-            interop: 'default',
             sourcemap: false
         }]
     }
@@ -96,15 +87,6 @@ export default args => {
             plugins: [
                 terser()
             ],
-            globals: {
-                '@fullcalendar/core': 'FullCalendar',
-                '@fullcalendar/daygrid': 'FullCalendarDayGrid',
-                '@fullcalendar/timegrid': 'FullCalendarTimeGrid',
-                '@fullcalendar/list': 'FullCalendarList',
-                '@fullcalendar/interaction': 'FullCalendarInteraction',
-                '@fullcalendar/bootstrap5': 'FullCalendarBootstrap5',
-            },
-            interop: 'default',
             sourcemap: false
         });
     }

@@ -52,7 +52,6 @@ def configure_resources(config, settings):
 
     config.register_resource(fullcalendar_resources)
     config.set_resource_include('fullcalendar-js', 'authenticated')
-    config.set_resource_include('fullcalendar-css', 'authenticated')
 
     config.register_resource(cone_calendar_resources)
     config.set_resource_include('cone-calendar-js', 'authenticated')
