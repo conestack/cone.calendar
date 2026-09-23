@@ -166,7 +166,7 @@ def calendar(model, request):
     return render_main_template(model, request, 'calendar')
 
 
-class JSONView(object):
+class JSONView:
     """Abstract JSON view.
     """
 

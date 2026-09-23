@@ -1,18 +1,25 @@
+from cone.app import get_root
 from cone.app import testing
 from cone.app.model import BaseNode
 from cone.app.model import Properties
 from cone.calendar import browser
 from cone.calendar.browser import CalendarEvents
 from cone.calendar.browser import CalendarTile
+from cone.calendar.browser.calendar import calendar
+from cone.calendar.browser.calendar import CalendarEventDrop
+from cone.calendar.browser.calendar import CalendarEventResize
 from cone.calendar.browser.calendar import JSONView
+from cone.calendar.interfaces import ICron
+from cone.calendar.interfaces import IEvent
 from cone.tile import render_tile
 from cone.tile.tests import TileTestCase
 from datetime import datetime
 from node.utils import instance_property
 from pyramid.httpexceptions import HTTPForbidden
+from zope.interface import implementer
+from zope.interface.verify import verifyObject
 import json
 import os
-import sys
 import unittest
 import uuid
 
@@ -184,6 +191,43 @@ class TestCalendarTile(TileTestCase):
             'title': 'Context Action',
         }])
 
+    def test_calendar_view(self):
+        # Main template needs the application root, e.g. for language flags
+        model = CalendarNode(name='calendar', parent=get_root())
+        request = self.layer.new_request()
+        with self.layer.authenticated('admin'):
+            response = calendar(model, request)
+        self.assertTrue(response.text.startswith('<!DOCTYPE html'))
+        self.assertTrue(response.text.find('<div id="calendar"') > -1)
+
+
+class TestInterfaces(unittest.TestCase):
+
+    def test_event_interface(self):
+        self.assertEqual(sorted(IEvent.names()), ['end', 'start'])
+
+        @implementer(IEvent)
+        class Event:
+            start = datetime(2026, 1, 1, 10)
+            end = datetime(2026, 1, 1, 11)
+
+        self.assertTrue(verifyObject(IEvent, Event()))
+
+    def test_cron_interface(self):
+        self.assertEqual(
+            sorted(ICron.names()),
+            ['duration', 'effective', 'expires', 'rule']
+        )
+
+        @implementer(ICron)
+        class Cron:
+            effective = datetime(2026, 1, 1)
+            expires = datetime(2027, 1, 1)
+            rule = '0 10 * * 1'
+            duration = 60
+
+        self.assertTrue(verifyObject(ICron, Cron()))
+
 
 class TestJSONView(TileTestCase):
     layer = calendar_layer
@@ -214,6 +258,18 @@ class TestJSONView(TileTestCase):
         res = view()
         self.assertEqual(sorted(res.keys()), ['data'])
         self.assertEqual(res['data'], 'data')
+
+    def test_event_drop_and_resize_views(self):
+        model = CalendarNode(name='calendar')
+        request = self.layer.new_request()
+        self.assertEqual(
+            CalendarEventDrop(model, request)(),
+            {'data': 'DROPPED'}
+        )
+        self.assertEqual(
+            CalendarEventResize(model, request)(),
+            {'data': 'RESIZED'}
+        )
 
 
 class TestCalendarEvents(TileTestCase):

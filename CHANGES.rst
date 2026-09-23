@@ -4,6 +4,15 @@ Changes
 2.0.0 (unreleased)
 ------------------
 
+- Modernise the code ruff flags as outdated: ``class X(object)``. Remove
+  unused import. Behaviour unchanged. ``super(Class, self)`` is kept, see
+  ``cone.app``.
+  [rnix]
+
+- Add ``qa.ruff`` domain to Makefile and pin the ruff rule selection in
+  ``pyproject.toml``, ``make check`` runs ``ruff check``.
+  [rnix]
+
 - Bootstrap 5 Styles.
 
 
