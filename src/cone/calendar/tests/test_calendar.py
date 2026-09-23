@@ -1,18 +1,25 @@
+from cone.app import get_root
 from cone.app import testing
 from cone.app.model import BaseNode
 from cone.app.model import Properties
 from cone.calendar import browser
 from cone.calendar.browser import CalendarEvents
 from cone.calendar.browser import CalendarTile
+from cone.calendar.browser.calendar import calendar
+from cone.calendar.browser.calendar import CalendarEventDrop
+from cone.calendar.browser.calendar import CalendarEventResize
 from cone.calendar.browser.calendar import JSONView
+from cone.calendar.interfaces import ICron
+from cone.calendar.interfaces import IEvent
 from cone.tile import render_tile
 from cone.tile.tests import TileTestCase
 from datetime import datetime
 from node.utils import instance_property
 from pyramid.httpexceptions import HTTPForbidden
+from zope.interface import implementer
+from zope.interface.verify import verifyObject
 import json
 import os
-import sys
 import unittest
 import uuid
 
@@ -49,11 +56,13 @@ class TestCalendarTile(TileTestCase):
         with self.layer.authenticated('admin'):
             rendered = render_tile(model, request, 'calendar')
         self.checkOutput("""
-        <div id="calendar"
-             data-calendar_target='http://example.com/calendar'
-             data-calendar_options='{"locale": "en"}'
-             data-calendar_sources='[{"events": "calendar_events"}]'
-             data-calendar_actions='[]'></div>
+        <div class="card card-body mt-3">
+          <div id="calendar"
+               data-calendar_target='http://example.com/calendar'
+               data-calendar_options='{"editable": false, "locale": "en"}'
+               data-calendar_sources='[{"events": "calendar_events"}]'
+               data-calendar_actions='[]'></div>
+        </div>
         """, rendered)
 
     def test_calendar_target(self):
@@ -70,20 +79,24 @@ class TestCalendarTile(TileTestCase):
         calendar.request = self.layer.new_request()
 
         self.assertEqual(calendar.option_mapping, {
-            'calendar_locale': 'locale',
-            'calendar_header': 'header',
-            'calendar_footer': 'footer',
+            'calendar_business_hours': 'businessHours',
             'calendar_first_day': 'firstDay',
-            'calendar_weekends': 'weekends',
+            'calendar_footer': 'footerToolbar',
+            'calendar_header': 'headerToolbar',
+            'calendar_locale': 'locale',
+            'calendar_week_number_calculation': 'weekNumberCalculation',
             'calendar_week_numbers': 'weekNumbers',
-            'calendar_week_numbers_within_days': 'weekNumbersWithinDays',
-            'calendar_business_hours': 'businessHours'
+            'calendar_weekends': 'weekends',
+            'event_overlap': 'slotEventOverlap'
         })
         self.assertEqual(calendar.default_options, {
             'calendar_locale': 'en'
         })
         self.assertTrue(isinstance(calendar.options, str))
-        self.assertEqual(json.loads(calendar.options), {'locale': 'en'})
+        self.assertEqual(json.loads(calendar.options), {
+            'editable': False,
+            'locale': 'en'
+        })
 
         properties = calendar.model.properties
         properties.calendar_locale = 'de'
@@ -108,12 +121,13 @@ class TestCalendarTile(TileTestCase):
         }]
         self.assertEqual(json.loads(calendar.options), {
             'locale': 'de',
-            'header': {
+            'editable': False,
+            'headerToolbar': {
                 'left': 'title',
                 'center': 'today',
                 'right': 'prev,next'
             },
-            'footer': {
+            'footerToolbar': {
                 'left': 'title',
                 'center': 'today',
                 'right': 'prev,next'
@@ -121,7 +135,6 @@ class TestCalendarTile(TileTestCase):
             'firstDay': 2,
             'weekends': False,
             'weekNumbers': True,
-            'weekNumbersWithinDays': True,
             'businessHours': [{
                 'dow': [1, 2, 3, 4, 5],
                 'start': '08:00',
@@ -178,6 +191,43 @@ class TestCalendarTile(TileTestCase):
             'title': 'Context Action',
         }])
 
+    def test_calendar_view(self):
+        # Main template needs the application root, e.g. for language flags
+        model = CalendarNode(name='calendar', parent=get_root())
+        request = self.layer.new_request()
+        with self.layer.authenticated('admin'):
+            response = calendar(model, request)
+        self.assertTrue(response.text.startswith('<!DOCTYPE html'))
+        self.assertTrue(response.text.find('<div id="calendar"') > -1)
+
+
+class TestInterfaces(unittest.TestCase):
+
+    def test_event_interface(self):
+        self.assertEqual(sorted(IEvent.names()), ['end', 'start'])
+
+        @implementer(IEvent)
+        class Event:
+            start = datetime(2026, 1, 1, 10)
+            end = datetime(2026, 1, 1, 11)
+
+        self.assertTrue(verifyObject(IEvent, Event()))
+
+    def test_cron_interface(self):
+        self.assertEqual(
+            sorted(ICron.names()),
+            ['duration', 'effective', 'expires', 'rule']
+        )
+
+        @implementer(ICron)
+        class Cron:
+            effective = datetime(2026, 1, 1)
+            expires = datetime(2027, 1, 1)
+            rule = '0 10 * * 1'
+            duration = 60
+
+        self.assertTrue(verifyObject(ICron, Cron()))
+
 
 class TestJSONView(TileTestCase):
     layer = calendar_layer
@@ -208,6 +258,18 @@ class TestJSONView(TileTestCase):
         res = view()
         self.assertEqual(sorted(res.keys()), ['data'])
         self.assertEqual(res['data'], 'data')
+
+    def test_event_drop_and_resize_views(self):
+        model = CalendarNode(name='calendar')
+        request = self.layer.new_request()
+        self.assertEqual(
+            CalendarEventDrop(model, request)(),
+            {'data': 'DROPPED'}
+        )
+        self.assertEqual(
+            CalendarEventResize(model, request)(),
+            {'data': 'RESIZED'}
+        )
 
 
 class TestCalendarEvents(TileTestCase):
@@ -268,23 +330,6 @@ def np(path):
 class TestResources(unittest.TestCase):
     layer = calendar_layer
 
-    def test_moment_resources(self):
-        resources_ = browser.moment_resources
-        self.assertTrue(resources_.directory.endswith(np('/static/moment')))
-        self.assertEqual(resources_.name, 'cone.calendar-moment')
-        self.assertEqual(resources_.path, 'moment')
-
-        scripts = resources_.scripts
-        self.assertEqual(len(scripts), 1)
-
-        self.assertTrue(scripts[0].directory.endswith(np('/static/moment')))
-        self.assertEqual(scripts[0].path, 'moment')
-        self.assertEqual(scripts[0].file_name, 'moment.min.js')
-        self.assertTrue(os.path.exists(scripts[0].file_path))
-
-        styles = resources_.styles
-        self.assertEqual(len(styles), 0)
-
     def test_fullcalendar_resources(self):
         resources_ = browser.fullcalendar_resources
         self.assertTrue(resources_.directory.endswith(np('/static/fullcalendar')))
@@ -292,30 +337,12 @@ class TestResources(unittest.TestCase):
         self.assertEqual(resources_.path, 'fullcalendar')
 
         scripts = resources_.scripts
-        self.assertEqual(len(scripts), 3)
+        self.assertEqual(len(scripts), 1)
 
         self.assertTrue(scripts[0].directory.endswith(np('/static/fullcalendar')))
         self.assertEqual(scripts[0].path, 'fullcalendar')
         self.assertEqual(scripts[0].file_name, 'fullcalendar.min.js')
         self.assertTrue(os.path.exists(scripts[0].file_path))
-
-        self.assertTrue(scripts[1].directory.endswith(np('/static/fullcalendar/locale')))
-        self.assertEqual(scripts[1].path, 'fullcalendar/locale')
-        self.assertEqual(scripts[1].file_name, 'de.js')
-        self.assertTrue(os.path.exists(scripts[1].file_path))
-
-        self.assertTrue(scripts[2].directory.endswith(np('/static/fullcalendar/locale')))
-        self.assertEqual(scripts[2].path, 'fullcalendar/locale')
-        self.assertEqual(scripts[2].file_name, 'it.js')
-        self.assertTrue(os.path.exists(scripts[2].file_path))
-
-        styles = resources_.styles
-        self.assertEqual(len(styles), 1)
-
-        self.assertTrue(styles[0].directory.endswith(np('/static/fullcalendar')))
-        self.assertEqual(styles[0].path, 'fullcalendar')
-        self.assertEqual(styles[0].file_name, 'fullcalendar.min.css')
-        self.assertTrue(os.path.exists(styles[0].file_path))
 
     def test_cone_calendar_resources(self):
         resources_ = browser.cone_calendar_resources

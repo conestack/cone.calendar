@@ -7,10 +7,11 @@
   <tal:contextmenu condition="context.show_contextmenu"
                    replace="structure tile('contextmenu')" />
 
-  <div id="calendar"
-       data-calendar_target='${context.target}'
-       data-calendar_options='${context.options}'
-       data-calendar_sources='${context.sources}'
-       data-calendar_actions='${context.actions}'></div>
-
+  <div class="card card-body mt-3">
+    <div id="calendar"
+         data-calendar_target='${context.target}'
+         data-calendar_options='${context.options}'
+         data-calendar_sources='${context.sources}'
+         data-calendar_actions='${context.actions}'></div>
+      </div>
 </tal:block>
