@@ -45,12 +45,12 @@ class CalendarTile(Tile):
         file.
 
     ``calendar_header``:
-        Corresponds to ``header`` option passed to fullcalendar.
+        Corresponds to ``headerToolbar`` option passed to fullcalendar.
 
         See https://fullcalendar.io/docs/v3/header
 
     ``calendar_footer``:
-        Corresponds to ``footer`` option passed to fullcalendar.
+        Corresponds to ``footerToolbar`` option passed to fullcalendar.
 
         See https://fullcalendar.io/docs/v3/footer
 
@@ -69,7 +69,7 @@ class CalendarTile(Tile):
 
         See https://fullcalendar.io/docs/v3/weekNumbers
 
-    ``calendar_week_numbers_within_days``:
+    ``calendar_week_number_calculation``:
         Corresponds to ``weekNumbersWithinDays`` option passed to fullcalendar.
 
         See https://fullcalendar.io/docs/v3/weekNumbersWithinDays
@@ -105,17 +105,25 @@ class CalendarTile(Tile):
 
         If ``calendar_actions`` is not defined on model properties,
         ``CalendarTile.default_actions`` is used.
+
+    ``calendar_title`` is an attribute of the tile, not a model property:
+    rendered as card header above the calendar if set. For a calendar shown
+    on several kinds of nodes, where what it shows depends on the node. None
+    by default, and the markup stays without a header.
     """
     show_contextmenu = False
+    calendar_title = None
+    editable = False
     option_mapping = {
         'calendar_locale': 'locale',
-        'calendar_header': 'header',
-        'calendar_footer': 'footer',
+        'calendar_header': 'headerToolbar',
+        'calendar_footer': 'footerToolbar',
         'calendar_first_day': 'firstDay',
         'calendar_weekends': 'weekends',
         'calendar_week_numbers': 'weekNumbers',
-        'calendar_week_numbers_within_days': 'weekNumbersWithinDays',
-        'calendar_business_hours': 'businessHours'
+        'calendar_week_number_calculation': 'weekNumberCalculation',
+        'calendar_business_hours': 'businessHours',
+        'event_overlap': 'slotEventOverlap'
     }
     default_options = {
         'calendar_locale': 'en'
@@ -133,14 +141,14 @@ class CalendarTile(Tile):
 
     @property
     def options(self):
-        options = {}
+        options = {'editable': self.editable}
         for prop_name, option_name in self.option_mapping.items():
             value = getattr(self.model.properties, prop_name)
             if value is None:
                 value = self.default_options.get(prop_name)
             if value is not None:
                 options[option_name] = value
-        return json.dumps(options, sort_keys=True) if options else None
+        return json.dumps(options, sort_keys=True)
 
     @property
     def sources(self):
@@ -164,7 +172,7 @@ def calendar(model, request):
     return render_main_template(model, request, 'calendar')
 
 
-class JSONView(object):
+class JSONView:
     """Abstract JSON view.
     """
 
@@ -238,7 +246,7 @@ class CalendarEvents(JSONView):
             'target': 'https://example.com/path/to/event',
             'actions': [{
                 'title': 'Edit',
-                'icon': 'glyphicons glyphicons-pencil',
+                'icon': 'bi bi-pencil',
                 'target': 'https://example.com/path/to/event?param=value',
                 'overlay': {
                     'action': 'overlayedit',
@@ -248,7 +256,7 @@ class CalendarEvents(JSONView):
                 }
             }, {
                 'title': 'Delete',
-                'icon': 'glyphicons glyphicons-remove-circle',
+                'icon': 'bi bi-x-circle',
                 'confirm': 'Do you really want to delete this event?',
                 'action': {
                     'name': 'delete',

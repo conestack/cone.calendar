@@ -1,10 +1,24 @@
 Changes
 =======
 
-1.1.2 (unreleased)
+2.0.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add optional ``CalendarTile.calendar_title``, rendered as card header above
+  the calendar. For a calendar shown on several kinds of nodes, where what it
+  shows depends on the node. ``None`` by default, the markup is unchanged then.
+  [rnix]
+
+- Modernise the code ruff flags as outdated: ``class X(object)``. Remove
+  unused import. Behaviour unchanged. ``super(Class, self)`` is kept, see
+  ``cone.app``.
+  [rnix]
+
+- Add ``qa.ruff`` domain to Makefile and pin the ruff rule selection in
+  ``pyproject.toml``, ``make check`` runs ``ruff check``.
+  [rnix]
+
+- Bootstrap 5 Styles.
 
 
 1.1.1 (2026-04-28)

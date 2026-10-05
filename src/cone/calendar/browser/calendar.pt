@@ -7,10 +7,17 @@
   <tal:contextmenu condition="context.show_contextmenu"
                    replace="structure tile('contextmenu')" />
 
-  <div id="calendar"
-       data-calendar_target='${context.target}'
-       data-calendar_options='${context.options}'
-       data-calendar_sources='${context.sources}'
-       data-calendar_actions='${context.actions}'></div>
-
+  <div tal:define="title context.calendar_title"
+       tal:attributes="class 'card mt-3' if title else 'card card-body mt-3'">
+    <h5 class="card-header"
+        tal:condition="title"
+        tal:content="title">Title</h5>
+    <div class="card-body" tal:omit-tag="not title">
+      <div id="calendar"
+           data-calendar_target='${context.target}'
+           data-calendar_options='${context.options}'
+           data-calendar_sources='${context.sources}'
+           data-calendar_actions='${context.actions}'></div>
+    </div>
+  </div>
 </tal:block>

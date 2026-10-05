@@ -1,0 +1,47 @@
+#calendar {
+    max-height: calc(100vh - 13rem);
+
+    button.btn-primary {
+        color: var(--bs-white);
+    }
+
+    @media (max-width: 700px) {
+        font-size: 0.75em;
+
+        div.fc-header-toolbar.fc-toolbar {
+            div.fc-toolbar-chunk {
+                button {
+                    font-size:12px;
+                }
+            }
+        }
+    }
+
+    // tooltip
+    .fc-timegrid-event .fc-event-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+.calendar-contextmenu {
+    z-index: 10000; // required for small viewport: fullcalendar renders dropdown
+
+    li {
+        cursor: pointer;
+        white-space: nowrap;
+    }
+}
+
+// more clearly mark draggable events
+.fc-event-draggable:hover {
+    cursor: grab;
+    box-shadow: 1px 1px 4px #00000040;
+    outline: 2px solid #00000014;
+    z-index: 10;
+}
+// mark as clickable
+.fc-event-clickable {
+    cursor: pointer;
+}
