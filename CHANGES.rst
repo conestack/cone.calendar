@@ -4,6 +4,11 @@ Changes
 2.0.0 (unreleased)
 ------------------
 
+- Add optional ``CalendarTile.calendar_title``, rendered as card header above
+  the calendar. For a calendar shown on several kinds of nodes, where what it
+  shows depends on the node. ``None`` by default, the markup is unchanged then.
+  [rnix]
+
 - Modernise the code ruff flags as outdated: ``class X(object)``. Remove
   unused import. Behaviour unchanged. ``super(Class, self)`` is kept, see
   ``cone.app``.

@@ -65,6 +65,36 @@ class TestCalendarTile(TileTestCase):
         </div>
         """, rendered)
 
+    def test_calendar_title(self):
+        # Optional: a calendar rendered on several kinds of nodes can say what
+        # it shows. Without one the markup stays as it was.
+        model = CalendarNode(name='calendar')
+        request = self.layer.new_request()
+        calendar = CalendarTile()
+        calendar.model = model
+        calendar.request = request
+        self.assertIsNone(calendar.calendar_title)
+
+        class TitledCalendarTile(CalendarTile):
+            calendar_title = 'Calendar of somebody'
+
+        with self.layer.authenticated('admin'):
+            rendered = TitledCalendarTile(
+                'cone.calendar.browser:calendar.pt', None, 'calendar'
+            )(model, request)
+        self.checkOutput("""
+        <div class="card mt-3">
+          <h5 class="card-header">Calendar of somebody</h5>
+          <div class="card-body">
+            <div id="calendar"
+                 data-calendar_target='http://example.com/calendar'
+                 data-calendar_options='{"editable": false, "locale": "en"}'
+                 data-calendar_sources='[{"events": "calendar_events"}]'
+                 data-calendar_actions='[]'></div>
+          </div>
+        </div>
+        """, rendered)
+
     def test_calendar_target(self):
         root = BaseNode(name='container')
         model = CalendarNode(name='cal', parent=root)

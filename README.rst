@@ -48,6 +48,26 @@ The overall calendar configuration is done via model properties.
 For a full list of available calendar options read
 ``cone.calendar.browser.CalendarTile`` documentation.
 
+A calendar rendered on several kinds of nodes can say what it shows. Set
+``calendar_title`` on a ``CalendarTile`` subclass, it is rendered as card
+header above the calendar. ``None`` by default, no header then.
+
+.. code-block:: python
+
+    from cone.calendar.browser import CalendarTile
+    from cone.tile import tile
+
+    @tile(
+        name='calendar',
+        path='cone.calendar.browser:calendar.pt',
+        interface=IMyCalendar,
+        permission='view')
+    class MyCalendarTile(CalendarTile):
+
+        @property
+        def calendar_title(self):
+            return f'Calendar: {self.model.metadata.title}'
+
 
 Calendar Events
 ---------------

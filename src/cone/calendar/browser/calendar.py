@@ -105,8 +105,14 @@ class CalendarTile(Tile):
 
         If ``calendar_actions`` is not defined on model properties,
         ``CalendarTile.default_actions`` is used.
+
+    ``calendar_title`` is an attribute of the tile, not a model property:
+    rendered as card header above the calendar if set. For a calendar shown
+    on several kinds of nodes, where what it shows depends on the node. None
+    by default, and the markup stays without a header.
     """
     show_contextmenu = False
+    calendar_title = None
     editable = False
     option_mapping = {
         'calendar_locale': 'locale',
