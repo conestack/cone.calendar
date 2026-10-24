@@ -3,6 +3,7 @@ from cone.app.browser.utils import format_traceback
 from cone.tile import Tile
 from cone.tile import tile
 from datetime import datetime
+from datetime import timezone
 from pyramid.i18n import TranslationStringFactory
 from pyramid.view import view_config
 import json
@@ -15,7 +16,7 @@ _ = TranslationStringFactory('cone.calendar')
 
 def parse_date(seconds):
     """Parse datetime from value received from fullcalendar."""
-    return datetime.utcfromtimestamp(int(seconds))
+    return datetime.fromtimestamp(int(seconds), timezone.utc).replace(tzinfo=None)
 
 
 def format_date(dt):

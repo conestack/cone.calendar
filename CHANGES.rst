@@ -4,6 +4,9 @@ Changes
 2.0.1 (unreleased)
 ------------------
 
+- Replace the deprecated ``datetime.utcfromtimestamp``.
+  [rnix]
+
 - Sort the imports with ruff (one per line, ``from`` imports first, no
   sections) and format the code with ``ruff format`` (90 characters per line,
   single quotes).
