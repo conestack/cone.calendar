@@ -1,7 +1,6 @@
 import $ from 'jquery';
 
 class EventSource {
-
     constructor(calendar, opts) {
         this._calendar = calendar;
         this._events_view = opts.events;
@@ -11,29 +10,33 @@ class EventSource {
     }
 
     events(info, successCallback, failureCallback) {
-        let calendar = this._calendar;
-        let url = calendar.target + '/' + this._events_view;
+        const calendar = this._calendar;
+        const url = `${calendar.target}/${this._events_view}`;
 
         // XXX: Have a feeling this can be better, included functionality
-        let params = {
+        const params = {
             start: Math.floor(info.start.getTime() / 1000),
             end: Math.floor(info.end.getTime() / 1000),
-            timezone: info.timeZone || 'local'
+            timezone: info.timeZone || 'local',
         };
 
-        calendar.json_request(url, params, (events) => {
-            successCallback(events);
-        }, (error) => {
-            console.error('Error fetching events:', error);
-            failureCallback(error);
-        });
+        calendar.json_request(
+            url,
+            params,
+            (events) => {
+                successCallback(events);
+            },
+            (error) => {
+                console.error('Error fetching events:', error);
+                failureCallback(error);
+            },
+        );
     }
 }
 
 export class Calendar {
-
     static initialize(context) {
-        let elem = $('#calendar', context);
+        const elem = $('#calendar', context);
         if (!elem.length) {
             return;
         }
@@ -44,12 +47,12 @@ export class Calendar {
         this.elem = elem;
         this.target = elem.data('calendar_target');
         this.actions = elem.data('calendar_actions');
-        let sources = elem.data('calendar_sources'),
+        const sources = elem.data('calendar_sources'),
             event_sources = [];
-        for (let i in sources) {
+        for (const i in sources) {
             event_sources.push(new EventSource(this, sources[i]));
         }
-        let options = elem.data('calendar_options');
+        const options = elem.data('calendar_options');
         $.extend(options, {
             locales: fullcalendar.localesAll,
             eventSources: event_sources,
@@ -65,8 +68,8 @@ export class Calendar {
                         const popover = $('.fc-popover');
                         if (popover) {
                             const w = elem.outerWidth(),
-                                  pw = popover.outerWidth(),
-                                  pl = parseInt(popover.css('left'));
+                                pw = popover.outerWidth(),
+                                pl = parseInt(popover.css('left'), 10);
                             if (pl + pw > w) {
                                 popover.css('transform', 'translateX(-100%)');
                             }
@@ -90,16 +93,14 @@ export class Calendar {
                 fullcalendar.dayGridPlugin,
                 fullcalendar.timeGridPlugin,
                 fullcalendar.listPlugin,
-                fullcalendar.interactionPlugin
+                fullcalendar.interactionPlugin,
             ],
             themeSystem: 'bootstrap5',
-            height: 'auto'
+            height: 'auto',
         });
         this.close_on_outside_click = this.close_on_outside_click.bind(this);
-        const calendar = this.calendar = new fullcalendar.Calendar(
-            this.elem.get(0),
-            options
-        );
+        const calendar = new fullcalendar.Calendar(this.elem.get(0), options);
+        this.calendar = calendar;
 
         this.refetch_events = this.refetch_events.bind(this);
         this.elem.on('reload', this.refetch_events);
@@ -139,33 +140,35 @@ export class Calendar {
             url: url,
             type: 'json',
             params: params,
-            success: function(data) {
+            success: (data) => {
                 if (data.error) {
-                    errback && errback();
+                    if (errback) {
+                        errback();
+                    }
                     bdajax.error(data.message);
                 } else {
                     callback(data.data);
                 }
             },
-            error: function() {
-                errback && errback();
+            error: () => {
+                if (errback) {
+                    errback();
+                }
                 bdajax.error('Failed to request JSON data');
-            }
+            },
         });
     }
 
     close_on_outside_click() {
         const handler = (event) => {
             const path = event.composedPath();
-            const inside_event = path.some(el => 
-                el.classList && el.classList.contains('fc-event')
-            );
+            const inside_event = path.some((el) => el.classList?.contains('fc-event'));
 
             if (!path.includes(this.menu) && !inside_event) {
                 this.menu.remove();
                 document.removeEventListener('click', handler);
             }
-        }
+        };
         // delay adding listener to avoid immediately catching the open click
         setTimeout(() => {
             document.addEventListener('click', handler);
@@ -177,11 +180,12 @@ export class Calendar {
         if (this.wrapper) {
             this.wrapper.remove();
         }
-        const wrapper = this.wrapper = $('<div />')
+        const wrapper = $('<div />')
             .attr('class', 'calendar-contextmenu-wrapper')
-            .css('height', body.height() + 'px');
+            .css('height', `${body.height()}px`);
+        this.wrapper = wrapper;
         body.append(wrapper);
-        wrapper.on('click contextmenu', function (e) {
+        wrapper.on('click contextmenu', (e) => {
             e.preventDefault();
             wrapper.remove();
         });
@@ -189,18 +193,19 @@ export class Calendar {
         const menu = $('<ul>')
             .addClass(
                 'calendar-contextmenu dropdown-menu list-group ' +
-                'list-group-flush p-0 rounded shadow'
+                    'list-group-flush p-0 rounded shadow',
             )
-            .css({ // measure menu dimensions off viewport
+            .css({
+                // measure menu dimensions off viewport
                 position: 'absolute',
                 left: '-9999px',
                 top: '-9999px',
                 visibility: 'hidden',
-                display: 'block'
+                display: 'block',
             });
         body.append(menu);
 
-        for (let i in actions) {
+        for (const i in actions) {
             this.add_menu_item(wrapper, menu, actions[i]);
         }
 
@@ -219,9 +224,9 @@ export class Calendar {
         }
 
         menu.css({
-            left: final_left + 'px',
-            top: y + 'px',
-            visibility: 'visible'
+            left: `${final_left}px`,
+            top: `${y}px`,
+            visibility: 'visible',
         });
 
         this.menu = menu;
@@ -236,11 +241,14 @@ export class Calendar {
         }
         $(`<span>${action.title}</span>`).appendTo(menu_item);
         menu.append(menu_item);
-        menu_item.on('click', function(e) {
-            e.stopPropagation();
-            wrapper.remove();
-            this.handle_action(action);
-        }.bind(this));
+        menu_item.on(
+            'click',
+            function (e) {
+                e.stopPropagation();
+                wrapper.remove();
+                this.handle_action(action);
+            }.bind(this),
+        );
     }
 
     prepare_target(target, params) {
@@ -258,65 +266,61 @@ export class Calendar {
             return;
         }
         if (action.confirm) {
-            bdajax.dialog({
-                message: action.confirm
-            }, function(options) {
-                this.perform_action(action);
-            }.bind(this));
+            bdajax.dialog(
+                {
+                    message: action.confirm,
+                },
+                function (_options) {
+                    this.perform_action(action);
+                }.bind(this),
+            );
         } else {
             this.perform_action(action);
         }
     }
 
     perform_action(action) {
-        let target = action.target;
+        const target = action.target;
         if (action.action) {
             bdajax.action({
                 name: action.action.name,
                 selector: action.action.selector,
                 mode: action.action.mode,
                 url: target.url,
-                    params: target.params
+                params: target.params,
             });
         }
         if (action.event) {
-            let event = action.event;
-            bdajax.trigger(
-                event.name,
-                event.selector,
-                target
-            );
+            const event = action.event;
+            bdajax.trigger(event.name, event.selector, target);
         }
         if (action.overlay) {
-            let overlay = action.overlay;
+            const overlay = action.overlay;
             bdajax.overlay({
                 action: overlay.action,
                 target: target,
                 selector: overlay.selector,
                 content_selector: overlay.content_selector,
                 css: overlay.css,
-                title: overlay.title
+                title: overlay.title,
             });
         }
     }
 
     handle_actions(actions, target, params, x, y) {
-        if (!actions || !actions.length) {
+        if (!actions?.length) {
             return;
         }
         // get a deepcopy of given actions
         actions = JSON.parse(JSON.stringify(actions));
         // prepare action target
-        for (let i in actions) {
-            let action = actions[i];
-            action.target = this.prepare_target(
-                action.target || target,
-                params
-            );
+        for (const i in actions) {
+            const action = actions[i];
+            action.target = this.prepare_target(action.target || target, params);
         }
         // only one action defined, gets executed direclty
-        if (actions.length == 1) {
-            let action = actions[0];
+        if (actions.length === 1) {
+            const action = actions[0];
             this.handle_action(action);
             return;
         }
@@ -332,15 +336,15 @@ export class Calendar {
         if (popover_close) {
             popover_close.click();
         }
-        let params = {
-            view: info.view.name
+        const params = {
+            view: info.view.name,
         };
         this.handle_actions(
             info.event.extendedProps.actions,
             info.event.extendedProps.target,
             params,
             e.pageX,
-            e.pageY
+            e.pageY,
         );
     }
 
@@ -349,44 +353,38 @@ export class Calendar {
         const date = info.date;
         const timestamp = Math.floor(date.getTime() / 1000);
 
-        let params = {
+        const params = {
             date: timestamp,
             all_day: date.allDay,
-            view: info.view.type
+            view: info.view.type,
         };
-        this.handle_actions(
-            this.actions,
-            this.target,
-            params,
-            e.pageX,
-            e.pageY
-        );
+        this.handle_actions(this.actions, this.target, params, e.pageX, e.pageY);
     }
 
     update_event(cal_evt, delta, revert_func, view, callback) {
-        let target = this.prepare_target(cal_evt.extendedProps.target, {
+        const target = this.prepare_target(cal_evt.extendedProps.target, {
             id: cal_evt.id,
             start: Math.floor(cal_evt.start.getTime() / 1000), // cal_evt.start.unix(),
             end: Math.floor(cal_evt.end.getTime() / 1000), // cal_evt.end.unix(),
-            delta: Math.round((delta.days * 86400000 + delta.milliseconds) / 1000) // moment.js dropped in v5
+            delta: Math.round((delta.days * 86400000 + delta.milliseconds) / 1000), // moment.js dropped in v5
         });
-        let url = target.url + '/' + view;
+        const url = `${target.url}/${view}`;
         this.json_request(url, target.params, callback, revert_func);
     }
 
     event_drop(info) {
-        let view = 'calendar_event_drop';
-        let cb = function(data) {
+        const view = 'calendar_event_drop';
+        const cb = (data) => {
             console.log(data);
-        }
+        };
         this.update_event(info.event, info.delta, info.revert, view, cb);
     }
 
     event_resize(info) {
-        let view = 'calendar_event_resize';
-        let cb = function(data) {
+        const view = 'calendar_event_resize';
+        const cb = (data) => {
             console.log(data);
-        }
+        };
         this.update_event(info.event, info.endDelta, info.revert, view, cb);
     }
 
