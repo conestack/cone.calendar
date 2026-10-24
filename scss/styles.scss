@@ -25,6 +25,17 @@
     }
 }
 
+// Transparent overlay below the context menu, a click on it closes the menu.
+// The overlay is a pseudo element and the wrapper stays static, a fixed
+// wrapper would become the containing block of the menu, which is positioned
+// in document coordinates. Clicks on the pseudo element target the wrapper.
+.calendar-contextmenu-wrapper::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+}
+
 .calendar-contextmenu {
     z-index: 10000; // required for small viewport: fullcalendar renders dropdown
 

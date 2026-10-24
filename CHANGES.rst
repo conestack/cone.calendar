@@ -4,6 +4,12 @@ Changes
 2.0.1 (unreleased)
 ------------------
 
+- Fix the calendar context menu wrapper making the page longer by the height
+  of the body instead of covering the viewport. A click outside of the menu
+  could only hit the wrapper in that extra area. The wrapper renders a
+  transparent overlay covering the viewport below the menu now.
+  [rnix]
+
 - Fix the calendar context menu closing on a click on its padding. Closing the
   menu by an item click, a click outside of it, opening another menu or
   destroying the calendar unregisters the outside click listener now. An

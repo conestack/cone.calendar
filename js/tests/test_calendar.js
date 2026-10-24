@@ -1211,6 +1211,24 @@ QUnit.module('cone.calendar.Calendar.create_context_menu', (hooks) => {
         assert.strictEqual(calendar.menu.css('left'), '0px', 'menu at left viewport border');
     });
 
+    QUnit.test('create_context_menu does not extend the page', (assert) => {
+        const elem = $(`
+            <div id="calendar"
+                 data-calendar_target="/api/calendar"
+                 data-calendar_actions='[]'
+                 data-calendar_sources='[]'
+                 data-calendar_options='{}'>
+            </div>
+        `).appendTo(container);
+        $('<div style="height: 3000px" />').appendTo(container);
+        const calendar = new Calendar(elem);
+        const page_height = document.documentElement.scrollHeight;
+
+        calendar.create_context_menu([{ title: 'Edit' }, { title: 'Delete' }], 100, 200);
+
+        assert.strictEqual(document.documentElement.scrollHeight, page_height, 'page height kept');
+    });
+
     QUnit.test('click outside closes context menu', async (assert) => {
         const listeners = await track_document_click_listeners();
         const elem = $(`

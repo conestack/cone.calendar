@@ -166,9 +166,7 @@ var cone_calendar = (function (exports, $) {
         create_context_menu(actions, x, y) {
             const body = $('body', document);
             this.close_context_menu();
-            const wrapper = $('<div />')
-                .attr('class', 'calendar-contextmenu-wrapper')
-                .css('height', `${body.height()}px`);
+            const wrapper = $('<div />').attr('class', 'calendar-contextmenu-wrapper');
             this.wrapper = wrapper;
             body.append(wrapper);
             wrapper.on('click contextmenu', (e) => {
