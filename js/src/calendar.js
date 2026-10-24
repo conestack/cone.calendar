@@ -98,7 +98,7 @@ export class Calendar {
             themeSystem: 'bootstrap5',
             height: 'auto',
         });
-        this.close_on_outside_click = this.close_on_outside_click.bind(this);
+        this.on_outside_click = this.on_outside_click.bind(this);
         const calendar = new fullcalendar.Calendar(this.elem.get(0), options);
         this.calendar = calendar;
 
@@ -159,27 +159,34 @@ export class Calendar {
         });
     }
 
-    close_on_outside_click() {
-        const handler = (event) => {
-            const path = event.composedPath();
-            const inside_event = path.some((el) => el.classList?.contains('fc-event'));
+    on_outside_click(event) {
+        const path = event.composedPath();
+        const inside_event = path.some((el) => el.classList?.contains('fc-event'));
+        if (!path.includes(this.menu[0]) && !inside_event) {
+            this.close_context_menu();
+        }
+    }
 
-            if (!path.includes(this.menu[0]) && !inside_event) {
-                this.menu.remove();
-                document.removeEventListener('click', handler);
-            }
-        };
+    close_on_outside_click() {
         // delay adding listener to avoid immediately catching the open click
-        setTimeout(() => {
-            document.addEventListener('click', handler);
+        this._outside_click_timer = setTimeout(() => {
+            document.addEventListener('click', this.on_outside_click);
         });
+    }
+
+    close_context_menu() {
+        if (!this.wrapper) {
+            return;
+        }
+        clearTimeout(this._outside_click_timer);
+        document.removeEventListener('click', this.on_outside_click);
+        // the wrapper contains the menu
+        this.wrapper.remove();
     }
 
     create_context_menu(actions, x, y) {
         const body = $('body', document);
-        if (this.wrapper) {
-            this.wrapper.remove();
-        }
+        this.close_context_menu();
         const wrapper = $('<div />')
             .attr('class', 'calendar-contextmenu-wrapper')
             .css('height', `${body.height()}px`);
@@ -187,7 +194,9 @@ export class Calendar {
         body.append(wrapper);
         wrapper.on('click contextmenu', (e) => {
             e.preventDefault();
-            wrapper.remove();
+            if (e.target === wrapper[0]) {
+                this.close_context_menu();
+            }
         });
 
         const menu = $('<ul>')
@@ -234,18 +243,18 @@ export class Calendar {
         this.close_on_outside_click();
     }
 
-    add_menu_item(wrapper, menu, action) {
+    add_menu_item(_wrapper, menu, action) {
         const menu_item = $('<li>').addClass('list-group-item list-group-item-action');
         if (action.icon) {
-            $(`<i class="${action.icon} me-2"></i>`).appendTo(menu_item);
+            $('<i>').addClass(action.icon).addClass('me-2').appendTo(menu_item);
         }
-        $(`<span>${action.title}</span>`).appendTo(menu_item);
+        $('<span>').text(action.title).appendTo(menu_item);
         menu.append(menu_item);
         menu_item.on(
             'click',
             function (e) {
                 e.stopPropagation();
-                wrapper.remove();
+                this.close_context_menu();
                 this.handle_action(action);
             }.bind(this),
         );
@@ -392,9 +401,7 @@ export class Calendar {
         this.elem.off('reload', this.refetch_events);
         this.calendar.destroy();
         this.calendar = null;
-        if (this.wrapper) {
-            this.wrapper.remove();
-        }
+        this.close_context_menu();
         $(window).off('resize', this.on_resize);
         cone.global_events.off('on_sidebar_left_resize', this.on_resize);
         cone.global_events.off('on_sidebar_right_resize', this.on_resize);

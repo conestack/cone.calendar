@@ -4,6 +4,16 @@ Changes
 2.0.1 (unreleased)
 ------------------
 
+- Fix the calendar context menu closing on a click on its padding. Closing the
+  menu by an item click, a click outside of it, opening another menu or
+  destroying the calendar unregisters the outside click listener now. An
+  outside click removes the menu wrapper element too.
+  [rnix]
+
+- Fix HTML injection via ``icon`` and ``title`` of calendar context menu
+  actions. The icon is set as CSS class, the title as text.
+  [rnix]
+
 - Fix the outside click handler of the calendar context menu treating clicks
   inside the menu as outside clicks. The menu was compared as jQuery object
   with the DOM nodes of the event path.

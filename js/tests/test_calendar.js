@@ -113,6 +113,35 @@ function patch_window_width(width) {
     };
 }
 
+function next_tick() {
+    return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
+// Collect the click listeners registered on document from now on
+async function track_document_click_listeners() {
+    // let delayed listener registrations of previous tests pass
+    await next_tick();
+    const listeners = new Set();
+    document.addEventListener = (type, listener, options) => {
+        if (type === 'click') {
+            listeners.add(listener);
+        }
+        EventTarget.prototype.addEventListener.call(document, type, listener, options);
+    };
+    document.removeEventListener = (type, listener, options) => {
+        if (type === 'click') {
+            listeners.delete(listener);
+        }
+        EventTarget.prototype.removeEventListener.call(document, type, listener, options);
+    };
+    return listeners;
+}
+
+function untrack_document_click_listeners() {
+    delete document.addEventListener;
+    delete document.removeEventListener;
+}
+
 QUnit.module('cone.calendar.Calendar.initialize', (hooks) => {
     let container;
 
@@ -275,7 +304,7 @@ QUnit.module('cone.calendar.Calendar.moreLinkDidMount', (hooks) => {
         calendar.calendar.options.moreLinkDidMount({ el: link });
         link.click();
         // popover position is checked in a timeout after the click
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await next_tick();
 
         assert.strictEqual(popover[0].style.transform, 'translateX(-100%)', 'popover moved');
     });
@@ -298,7 +327,7 @@ QUnit.module('cone.calendar.Calendar.moreLinkDidMount', (hooks) => {
 
         calendar.calendar.options.moreLinkDidMount({ el: link });
         link.click();
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await next_tick();
 
         assert.strictEqual(popover[0].style.transform, '', 'popover not moved');
     });
@@ -1056,6 +1085,7 @@ QUnit.module('cone.calendar.Calendar.create_context_menu', (hooks) => {
 
     hooks.afterEach(() => {
         $.fn.width = orig_width;
+        untrack_document_click_listeners();
         container.remove();
         $('.calendar-contextmenu-wrapper').remove();
         teardown_global_mocks();
@@ -1182,6 +1212,7 @@ QUnit.module('cone.calendar.Calendar.create_context_menu', (hooks) => {
     });
 
     QUnit.test('click outside closes context menu', async (assert) => {
+        const listeners = await track_document_click_listeners();
         const elem = $(`
             <div id="calendar"
                  data-calendar_target="/api/calendar"
@@ -1193,16 +1224,15 @@ QUnit.module('cone.calendar.Calendar.create_context_menu', (hooks) => {
         const calendar = new Calendar(elem);
         calendar.create_context_menu([{ title: 'Edit' }, { title: 'Delete' }], 100, 200);
         // outside click listener gets registered in a timeout
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await next_tick();
+
+        assert.strictEqual(listeners.size, 1, 'outside click listener registered');
 
         document.body.click();
 
         assert.strictEqual($('.calendar-contextmenu').length, 0, 'menu removed');
-
-        calendar.menu = $('<ul class="calendar-contextmenu" />').appendTo(container);
-        document.body.click();
-
-        assert.strictEqual($('.calendar-contextmenu').length, 1, 'outside click listener removed');
+        assert.strictEqual($('.calendar-contextmenu-wrapper').length, 0, 'wrapper removed');
+        assert.strictEqual(listeners.size, 0, 'outside click listener removed');
     });
 
     QUnit.test('click on calendar event keeps context menu', async (assert) => {
@@ -1217,14 +1247,14 @@ QUnit.module('cone.calendar.Calendar.create_context_menu', (hooks) => {
         const calendar = new Calendar(elem);
         const fc_event = $('<div class="fc-event" />').appendTo(container);
         calendar.create_context_menu([{ title: 'Edit' }, { title: 'Delete' }], 100, 200);
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await next_tick();
 
         fc_event[0].click();
 
         assert.strictEqual($('.calendar-contextmenu').length, 1, 'menu kept');
     });
 
-    QUnit.test('click inside context menu keeps it', async (assert) => {
+    QUnit.test('click on context menu padding keeps it', async (assert) => {
         const elem = $(`
             <div id="calendar"
                  data-calendar_target="/api/calendar"
@@ -1234,19 +1264,117 @@ QUnit.module('cone.calendar.Calendar.create_context_menu', (hooks) => {
             </div>
         `).appendTo(container);
         const calendar = new Calendar(elem);
-        calendar.menu = $('<ul class="calendar-contextmenu"><li>Edit</li></ul>').appendTo(
-            container,
-        );
-        calendar.close_on_outside_click();
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        calendar.create_context_menu([{ title: 'Edit' }, { title: 'Delete' }], 100, 200);
+        await next_tick();
 
-        $('li', calendar.menu)[0].click();
+        calendar.menu[0].click();
 
         assert.strictEqual($('.calendar-contextmenu').length, 1, 'menu kept');
 
         document.body.click();
 
         assert.strictEqual($('.calendar-contextmenu').length, 0, 'menu removed');
+    });
+
+    QUnit.test('item click unregisters outside click listener', async (assert) => {
+        const listeners = await track_document_click_listeners();
+        const elem = $(`
+            <div id="calendar"
+                 data-calendar_target="/api/calendar"
+                 data-calendar_actions='[]'
+                 data-calendar_sources='[]'
+                 data-calendar_options='{}'>
+            </div>
+        `).appendTo(container);
+        const calendar = new Calendar(elem);
+        calendar.handle_action = () => {};
+        calendar.create_context_menu([{ title: 'Edit' }, { title: 'Delete' }], 100, 200);
+        await next_tick();
+
+        $('li', calendar.menu)[0].click();
+
+        assert.strictEqual($('.calendar-contextmenu').length, 0, 'menu removed');
+        assert.strictEqual(listeners.size, 0, 'outside click listener removed');
+    });
+
+    QUnit.test('wrapper click unregisters outside click listener', async (assert) => {
+        const listeners = await track_document_click_listeners();
+        const elem = $(`
+            <div id="calendar"
+                 data-calendar_target="/api/calendar"
+                 data-calendar_actions='[]'
+                 data-calendar_sources='[]'
+                 data-calendar_options='{}'>
+            </div>
+        `).appendTo(container);
+        const calendar = new Calendar(elem);
+        calendar.create_context_menu([{ title: 'Edit' }, { title: 'Delete' }], 100, 200);
+        await next_tick();
+
+        calendar.wrapper[0].click();
+
+        assert.strictEqual($('.calendar-contextmenu').length, 0, 'menu removed');
+        assert.strictEqual(listeners.size, 0, 'outside click listener removed');
+    });
+
+    QUnit.test('reopening context menu replaces outside click listener', async (assert) => {
+        const listeners = await track_document_click_listeners();
+        const elem = $(`
+            <div id="calendar"
+                 data-calendar_target="/api/calendar"
+                 data-calendar_actions='[]'
+                 data-calendar_sources='[]'
+                 data-calendar_options='{}'>
+            </div>
+        `).appendTo(container);
+        const calendar = new Calendar(elem);
+        calendar.create_context_menu([{ title: 'Edit' }, { title: 'Delete' }], 100, 200);
+        await next_tick();
+        calendar.create_context_menu([{ title: 'Edit' }, { title: 'Delete' }], 150, 250);
+        await next_tick();
+
+        assert.strictEqual(listeners.size, 1, 'one outside click listener');
+
+        calendar.destroy();
+    });
+
+    QUnit.test('destroy unregisters outside click listener', async (assert) => {
+        const listeners = await track_document_click_listeners();
+        const elem = $(`
+            <div id="calendar"
+                 data-calendar_target="/api/calendar"
+                 data-calendar_actions='[]'
+                 data-calendar_sources='[]'
+                 data-calendar_options='{}'>
+            </div>
+        `).appendTo(container);
+        const calendar = new Calendar(elem);
+        calendar.create_context_menu([{ title: 'Edit' }, { title: 'Delete' }], 100, 200);
+        await next_tick();
+
+        calendar.destroy();
+
+        assert.strictEqual($('.calendar-contextmenu').length, 0, 'menu removed');
+        assert.strictEqual(listeners.size, 0, 'outside click listener removed');
+    });
+
+    QUnit.test('closing context menu at once skips outside click listener', async (assert) => {
+        const listeners = await track_document_click_listeners();
+        const elem = $(`
+            <div id="calendar"
+                 data-calendar_target="/api/calendar"
+                 data-calendar_actions='[]'
+                 data-calendar_sources='[]'
+                 data-calendar_options='{}'>
+            </div>
+        `).appendTo(container);
+        const calendar = new Calendar(elem);
+        calendar.create_context_menu([{ title: 'Edit' }, { title: 'Delete' }], 100, 200);
+
+        calendar.destroy();
+        await next_tick();
+
+        assert.strictEqual(listeners.size, 0, 'outside click listener not registered');
     });
 });
 
@@ -1305,6 +1433,50 @@ QUnit.module('cone.calendar.Calendar.add_menu_item', (hooks) => {
         assert.strictEqual(menu.find('i.bi-pencil').length, 1, 'icon added');
     });
 
+    QUnit.test('add_menu_item renders title as text', (assert) => {
+        const elem = $(`
+            <div id="calendar"
+                 data-calendar_target="/api/calendar"
+                 data-calendar_actions='[]'
+                 data-calendar_sources='[]'
+                 data-calendar_options='{}'>
+            </div>
+        `).appendTo(container);
+
+        const calendar = new Calendar(elem);
+        const wrapper = $('<div />');
+        const menu = $('<ul />');
+
+        calendar.add_menu_item(wrapper, menu, { title: '<img class="injected">' });
+
+        assert.strictEqual(menu.find('.injected').length, 0, 'no markup injected');
+        assert.strictEqual(menu.find('span').text(), '<img class="injected">', 'title as text');
+    });
+
+    QUnit.test('add_menu_item sets icon as class', (assert) => {
+        const elem = $(`
+            <div id="calendar"
+                 data-calendar_target="/api/calendar"
+                 data-calendar_actions='[]'
+                 data-calendar_sources='[]'
+                 data-calendar_options='{}'>
+            </div>
+        `).appendTo(container);
+
+        const calendar = new Calendar(elem);
+        const wrapper = $('<div />');
+        const menu = $('<ul />');
+
+        calendar.add_menu_item(wrapper, menu, {
+            title: 'Edit',
+            icon: '"><img class="injected"><i class="',
+        });
+
+        assert.strictEqual(menu.find('.injected').length, 0, 'no markup injected');
+        assert.strictEqual(menu.find('i').length, 1, 'one icon');
+        assert.true(menu.find('i').hasClass('me-2'), 'icon spacing class kept');
+    });
+
     QUnit.test('add_menu_item click triggers handle_action', (assert) => {
         const elem = $(`
             <div id="calendar"
@@ -1317,6 +1489,7 @@ QUnit.module('cone.calendar.Calendar.add_menu_item', (hooks) => {
 
         const calendar = new Calendar(elem);
         const wrapper = $('<div />').appendTo(container);
+        calendar.wrapper = wrapper;
         const menu = $('<ul />');
 
         let handled_action = null;
@@ -1343,6 +1516,7 @@ QUnit.module('cone.calendar.Calendar.event_clicked', (hooks) => {
     });
 
     hooks.afterEach(() => {
+        untrack_document_click_listeners();
         container.remove();
         teardown_global_mocks();
     });
@@ -1406,6 +1580,35 @@ QUnit.module('cone.calendar.Calendar.event_clicked', (hooks) => {
         });
 
         assert.strictEqual(close_clicks, 1, 'popover close button clicked');
+    });
+
+    QUnit.test('event click in popover replaces open context menu', async (assert) => {
+        const listeners = await track_document_click_listeners();
+        const elem = $(`
+            <div id="calendar"
+                 data-calendar_target="/api/calendar"
+                 data-calendar_actions='[]'
+                 data-calendar_sources='[]'
+                 data-calendar_options='{}'>
+            </div>
+        `).appendTo(container);
+        const calendar = new Calendar(elem);
+        $('<span class="fc-popover-close" />').appendTo(container);
+        const actions = [{ title: 'Edit' }, { title: 'Delete' }];
+        calendar.create_context_menu(actions, 100, 200);
+        await next_tick();
+
+        calendar.event_clicked({
+            jsEvent: { pageX: 150, pageY: 250 },
+            view: { name: 'dayGridMonth' },
+            event: { extendedProps: { actions: actions, target: '/api/event/1' } },
+        });
+        await next_tick();
+
+        assert.strictEqual($('.calendar-contextmenu').length, 1, 'one menu open');
+        assert.strictEqual(listeners.size, 1, 'one outside click listener');
+
+        calendar.destroy();
     });
 });
 
