@@ -25,19 +25,16 @@ import uuid
 
 
 class CalendarLayer(testing.Security):
-
     def make_app(self, **kw):
-        super(CalendarLayer, self).make_app(**{
-            'cone.plugins': 'cone.calendar',
-            'cone.calendar.locales': 'de,it'
-        })
+        super(CalendarLayer, self).make_app(
+            **{'cone.plugins': 'cone.calendar', 'cone.calendar.locales': 'de,it'}
+        )
 
 
 calendar_layer = CalendarLayer()
 
 
 class CalendarNode(BaseNode):
-
     @instance_property
     def properties(self):
         return Properties()
@@ -55,7 +52,8 @@ class TestCalendarTile(TileTestCase):
 
         with self.layer.authenticated('admin'):
             rendered = render_tile(model, request, 'calendar')
-        self.checkOutput("""
+        self.checkOutput(
+            """
         <div class="card card-body mt-3">
           <div id="calendar"
                data-calendar_target='http://example.com/calendar'
@@ -63,7 +61,9 @@ class TestCalendarTile(TileTestCase):
                data-calendar_sources='[{"events": "calendar_events"}]'
                data-calendar_actions='[]'></div>
         </div>
-        """, rendered)
+        """,
+            rendered,
+        )
 
     def test_calendar_title(self):
         # Optional: a calendar rendered on several kinds of nodes can say what
@@ -82,7 +82,8 @@ class TestCalendarTile(TileTestCase):
             rendered = TitledCalendarTile(
                 'cone.calendar.browser:calendar.pt', None, 'calendar'
             )(model, request)
-        self.checkOutput("""
+        self.checkOutput(
+            """
         <div class="card mt-3">
           <h5 class="card-header">Calendar of somebody</h5>
           <div class="card-body">
@@ -93,7 +94,9 @@ class TestCalendarTile(TileTestCase):
                  data-calendar_actions='[]'></div>
           </div>
         </div>
-        """, rendered)
+        """,
+            rendered,
+        )
 
     def test_calendar_target(self):
         root = BaseNode(name='container')
@@ -108,94 +111,87 @@ class TestCalendarTile(TileTestCase):
         calendar.model = CalendarNode(name='calendar')
         calendar.request = self.layer.new_request()
 
-        self.assertEqual(calendar.option_mapping, {
-            'calendar_business_hours': 'businessHours',
-            'calendar_first_day': 'firstDay',
-            'calendar_footer': 'footerToolbar',
-            'calendar_header': 'headerToolbar',
-            'calendar_locale': 'locale',
-            'calendar_week_number_calculation': 'weekNumberCalculation',
-            'calendar_week_numbers': 'weekNumbers',
-            'calendar_weekends': 'weekends',
-            'event_overlap': 'slotEventOverlap'
-        })
-        self.assertEqual(calendar.default_options, {
-            'calendar_locale': 'en'
-        })
+        self.assertEqual(
+            calendar.option_mapping,
+            {
+                'calendar_business_hours': 'businessHours',
+                'calendar_first_day': 'firstDay',
+                'calendar_footer': 'footerToolbar',
+                'calendar_header': 'headerToolbar',
+                'calendar_locale': 'locale',
+                'calendar_week_number_calculation': 'weekNumberCalculation',
+                'calendar_week_numbers': 'weekNumbers',
+                'calendar_weekends': 'weekends',
+                'event_overlap': 'slotEventOverlap',
+            },
+        )
+        self.assertEqual(calendar.default_options, {'calendar_locale': 'en'})
         self.assertTrue(isinstance(calendar.options, str))
-        self.assertEqual(json.loads(calendar.options), {
-            'editable': False,
-            'locale': 'en'
-        })
+        self.assertEqual(
+            json.loads(calendar.options), {'editable': False, 'locale': 'en'}
+        )
 
         properties = calendar.model.properties
         properties.calendar_locale = 'de'
         properties.calendar_header = {
             'left': 'title',
             'center': 'today',
-            'right': 'prev,next'
+            'right': 'prev,next',
         }
         properties.calendar_footer = {
             'left': 'title',
             'center': 'today',
-            'right': 'prev,next'
+            'right': 'prev,next',
         }
         properties.calendar_first_day = 2
         properties.calendar_weekends = False
         properties.calendar_week_numbers = True
         properties.calendar_week_numbers_within_days = True
-        properties.calendar_business_hours = [{
-            'dow': [1, 2, 3, 4, 5],
-            'start': '08:00',
-            'end': '18:00'
-        }]
-        self.assertEqual(json.loads(calendar.options), {
-            'locale': 'de',
-            'editable': False,
-            'headerToolbar': {
-                'left': 'title',
-                'center': 'today',
-                'right': 'prev,next'
+        properties.calendar_business_hours = [
+            {'dow': [1, 2, 3, 4, 5], 'start': '08:00', 'end': '18:00'}
+        ]
+        self.assertEqual(
+            json.loads(calendar.options),
+            {
+                'locale': 'de',
+                'editable': False,
+                'headerToolbar': {
+                    'left': 'title',
+                    'center': 'today',
+                    'right': 'prev,next',
+                },
+                'footerToolbar': {
+                    'left': 'title',
+                    'center': 'today',
+                    'right': 'prev,next',
+                },
+                'firstDay': 2,
+                'weekends': False,
+                'weekNumbers': True,
+                'businessHours': [
+                    {'dow': [1, 2, 3, 4, 5], 'start': '08:00', 'end': '18:00'}
+                ],
             },
-            'footerToolbar': {
-                'left': 'title',
-                'center': 'today',
-                'right': 'prev,next'
-            },
-            'firstDay': 2,
-            'weekends': False,
-            'weekNumbers': True,
-            'businessHours': [{
-                'dow': [1, 2, 3, 4, 5],
-                'start': '08:00',
-                'end': '18:00'
-            }]
-        })
+        )
 
     def test_calendar_sources(self):
         calendar = CalendarTile()
         calendar.model = CalendarNode(name='calendar')
         calendar.request = self.layer.new_request()
 
-        self.assertEqual(calendar.default_sources, [
-            {'events': 'calendar_events'}
-        ])
+        self.assertEqual(calendar.default_sources, [{'events': 'calendar_events'}])
         self.assertTrue(isinstance(calendar.sources, str))
-        self.assertEqual(json.loads(calendar.sources), [{
-            'events': 'calendar_events'
-        }])
+        self.assertEqual(json.loads(calendar.sources), [{'events': 'calendar_events'}])
 
         properties = calendar.model.properties
-        properties.calendar_sources = [{
-            'events': 'calendar_events_1'
-        }, {
-            'events': 'calendar_events_2'
-        }]
-        self.assertEqual(json.loads(calendar.sources), [{
-            'events': 'calendar_events_1'
-        }, {
-            'events': 'calendar_events_2'
-        }])
+        properties.calendar_sources = [
+            {'events': 'calendar_events_1'},
+            {'events': 'calendar_events_2'},
+        ]
+        self.assertEqual(
+            json.loads(calendar.sources),
+            [{'events': 'calendar_events_1'}, {'events': 'calendar_events_2'}],
+        )
 
     def test_calendar_actions(self):
         calendar = CalendarTile()
@@ -206,20 +202,34 @@ class TestCalendarTile(TileTestCase):
         self.assertTrue(isinstance(calendar.actions, str))
         self.assertEqual(json.loads(calendar.actions), [])
 
-        calendar.default_actions = [{
-            'title': 'Default Action',
-        }]
-        self.assertEqual(json.loads(calendar.actions), [{
-            'title': 'Default Action',
-        }])
+        calendar.default_actions = [
+            {
+                'title': 'Default Action',
+            }
+        ]
+        self.assertEqual(
+            json.loads(calendar.actions),
+            [
+                {
+                    'title': 'Default Action',
+                }
+            ],
+        )
 
         properties = calendar.model.properties
-        properties.calendar_actions = [{
-            'title': 'Context Action',
-        }]
-        self.assertEqual(json.loads(calendar.actions), [{
-            'title': 'Context Action',
-        }])
+        properties.calendar_actions = [
+            {
+                'title': 'Context Action',
+            }
+        ]
+        self.assertEqual(
+            json.loads(calendar.actions),
+            [
+                {
+                    'title': 'Context Action',
+                }
+            ],
+        )
 
     def test_calendar_view(self):
         # Main template needs the application root, e.g. for language flags
@@ -232,7 +242,6 @@ class TestCalendarTile(TileTestCase):
 
 
 class TestInterfaces(unittest.TestCase):
-
     def test_event_interface(self):
         self.assertEqual(sorted(IEvent.names()), ['end', 'start'])
 
@@ -245,8 +254,7 @@ class TestInterfaces(unittest.TestCase):
 
     def test_cron_interface(self):
         self.assertEqual(
-            sorted(ICron.names()),
-            ['duration', 'effective', 'expires', 'rule']
+            sorted(ICron.names()), ['duration', 'effective', 'expires', 'rule']
         )
 
         @implementer(ICron)
@@ -273,12 +281,15 @@ class TestJSONView(TileTestCase):
         res = view()
         self.assertEqual(sorted(res.keys()), ['error', 'message'])
         self.assertTrue(res['error'])
-        self.checkOutput("""
+        self.checkOutput(
+            """
         <pre>Traceback (most recent call last):
         ...
         NotImplementedError:
         Abstract ``JSONView`` does not implement ``data``\n</pre>
-        """, res['message'])
+        """,
+            res['message'],
+        )
 
         class MyJSONView(JSONView):
             def data(self):
@@ -292,14 +303,8 @@ class TestJSONView(TileTestCase):
     def test_event_drop_and_resize_views(self):
         model = CalendarNode(name='calendar')
         request = self.layer.new_request()
-        self.assertEqual(
-            CalendarEventDrop(model, request)(),
-            {'data': 'DROPPED'}
-        )
-        self.assertEqual(
-            CalendarEventResize(model, request)(),
-            {'data': 'RESIZED'}
-        )
+        self.assertEqual(CalendarEventDrop(model, request)(), {'data': 'DROPPED'})
+        self.assertEqual(CalendarEventResize(model, request)(), {'data': 'RESIZED'})
 
 
 class TestCalendarEvents(TileTestCase):
@@ -326,31 +331,41 @@ class TestCalendarEvents(TileTestCase):
         res = events()
         self.assertEqual(sorted(res.keys()), ['error', 'message'])
         self.assertTrue(res['error'])
-        self.checkOutput("""
+        self.checkOutput(
+            """
         <pre>Traceback (most recent call last):
         ...
         NotImplementedError:
         Abstract ``CalendarEvents`` does not implement ``events``\n</pre>
-        """, res['message'])
+        """,
+            res['message'],
+        )
 
         class MyEvents(CalendarEvents):
             def events(self, start, end):
-                return [{
-                    'id': uuid.UUID('08148acd-edda-4e37-9d43-662d4b2d5f59'),
-                    'title': 'Title',
-                    'start': datetime(2020, 5, 1, 7, 0),
-                    'end': datetime(2020, 5, 1, 7, 30),
-                }]
+                return [
+                    {
+                        'id': uuid.UUID('08148acd-edda-4e37-9d43-662d4b2d5f59'),
+                        'title': 'Title',
+                        'start': datetime(2020, 5, 1, 7, 0),
+                        'end': datetime(2020, 5, 1, 7, 30),
+                    }
+                ]
 
         events = MyEvents(model, request)
-        self.assertEqual(events(), {
-            'data': [{
-                'id': '08148acd-edda-4e37-9d43-662d4b2d5f59',
-                'title': 'Title',
-                'start': '2020-05-01T07:00:00',
-                'end': '2020-05-01T07:30:00'
-            }]
-        })
+        self.assertEqual(
+            events(),
+            {
+                'data': [
+                    {
+                        'id': '08148acd-edda-4e37-9d43-662d4b2d5f59',
+                        'title': 'Title',
+                        'start': '2020-05-01T07:00:00',
+                        'end': '2020-05-01T07:30:00',
+                    }
+                ]
+            },
+        )
 
 
 def np(path):

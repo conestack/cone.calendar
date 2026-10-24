@@ -14,14 +14,12 @@ _ = TranslationStringFactory('cone.calendar')
 
 
 def parse_date(seconds):
-    """Parse datetime from value received from fullcalendar.
-    """
+    """Parse datetime from value received from fullcalendar."""
     return datetime.utcfromtimestamp(int(seconds))
 
 
 def format_date(dt):
-    """Format datetime suitable for fullcalendar.
-    """
+    """Format datetime suitable for fullcalendar."""
     return dt.isoformat()
 
 
@@ -111,6 +109,7 @@ class CalendarTile(Tile):
     on several kinds of nodes, where what it shows depends on the node. None
     by default, and the markup stays without a header.
     """
+
     show_contextmenu = False
     calendar_title = None
     editable = False
@@ -123,20 +122,15 @@ class CalendarTile(Tile):
         'calendar_week_numbers': 'weekNumbers',
         'calendar_week_number_calculation': 'weekNumberCalculation',
         'calendar_business_hours': 'businessHours',
-        'event_overlap': 'slotEventOverlap'
+        'event_overlap': 'slotEventOverlap',
     }
-    default_options = {
-        'calendar_locale': 'en'
-    }
-    default_sources = [{
-        'events': 'calendar_events'
-    }]
+    default_options = {'calendar_locale': 'en'}
+    default_sources = [{'events': 'calendar_events'}]
     default_actions = []
 
     @property
     def target(self):
-        """Calendar context target. Gets used for querying event sources.
-        """
+        """Calendar context target. Gets used for querying event sources."""
         return self.nodeurl
 
     @property
@@ -167,14 +161,12 @@ class CalendarTile(Tile):
 
 @view_config(name='calendar', permission='view')
 def calendar(model, request):
-    """Traversable view rendering the ``calendar`` tile to content area.
-    """
+    """Traversable view rendering the ``calendar`` tile to content area."""
     return render_main_template(model, request, 'calendar')
 
 
 class JSONView:
-    """Abstract JSON view.
-    """
+    """Abstract JSON view."""
 
     def __init__(self, model, request):
         self.model = model
@@ -193,25 +185,18 @@ class JSONView:
             return dict(data=self.data())
         except Exception as e:
             logger.exception(e)
-            return dict(
-                error=True,
-                message=format_traceback()
-            )
+            return dict(error=True, message=format_traceback())
 
     def data(self):
         """Supposed to be implemented on subclass. Responsible to compute JSON
         data delivered to client.
         """
-        raise NotImplementedError(
-            'Abstract ``JSONView`` does not implement ``data``'
-        )
+        raise NotImplementedError('Abstract ``JSONView`` does not implement ``data``')
 
 
 @view_config(
-    name='calendar_events',
-    accept='application/json',
-    renderer='json',
-    permission='view')
+    name='calendar_events', accept='application/json', renderer='json', permission='view'
+)
 class CalendarEvents(JSONView):
     """Abstract JSON event data view for fullcalendar.
 
@@ -221,15 +206,13 @@ class CalendarEvents(JSONView):
 
     @property
     def range_start(self):
-        """Event range start as datetime.
-        """
+        """Event range start as datetime."""
         start = self.request.params.get('start')
         return parse_date(start)
 
     @property
     def range_end(self):
-        """Event range end as datetime.
-        """
+        """Event range end as datetime."""
         end = self.request.params.get('end')
         return parse_date(end)
 
@@ -355,10 +338,10 @@ class CalendarEvents(JSONView):
     # context=IScheduled,
     accept='application/json',
     renderer='json',
-    permission='view')
+    permission='view',
+)
 class CalendarEventDrop(JSONView):
-    """JSON view for modifying event start time.
-    """
+    """JSON view for modifying event start time."""
 
     def data(self):
         return 'DROPPED'
@@ -369,10 +352,10 @@ class CalendarEventDrop(JSONView):
     # context=IScheduled,
     accept='application/json',
     renderer='json',
-    permission='view')
+    permission='view',
+)
 class CalendarEventResize(JSONView):
-    """JSON view for modifying event duration.
-    """
+    """JSON view for modifying event duration."""
 
     def data(self):
         return 'RESIZED'
