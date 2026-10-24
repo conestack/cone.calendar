@@ -1223,6 +1223,31 @@ QUnit.module('cone.calendar.Calendar.create_context_menu', (hooks) => {
 
         assert.strictEqual($('.calendar-contextmenu').length, 1, 'menu kept');
     });
+
+    QUnit.test('click inside context menu keeps it', async (assert) => {
+        const elem = $(`
+            <div id="calendar"
+                 data-calendar_target="/api/calendar"
+                 data-calendar_actions='[]'
+                 data-calendar_sources='[]'
+                 data-calendar_options='{}'>
+            </div>
+        `).appendTo(container);
+        const calendar = new Calendar(elem);
+        calendar.menu = $('<ul class="calendar-contextmenu"><li>Edit</li></ul>').appendTo(
+            container,
+        );
+        calendar.close_on_outside_click();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        $('li', calendar.menu)[0].click();
+
+        assert.strictEqual($('.calendar-contextmenu').length, 1, 'menu kept');
+
+        document.body.click();
+
+        assert.strictEqual($('.calendar-contextmenu').length, 0, 'menu removed');
+    });
 });
 
 QUnit.module('cone.calendar.Calendar.add_menu_item', (hooks) => {

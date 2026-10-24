@@ -4,6 +4,11 @@ Changes
 2.0.1 (unreleased)
 ------------------
 
+- Fix the outside click handler of the calendar context menu treating clicks
+  inside the menu as outside clicks. The menu was compared as jQuery object
+  with the DOM nodes of the event path.
+  [rnix]
+
 - Extend the JS tests to 100 % coverage, all modules including bundles are
   loaded by the tests now.
   [rnix]

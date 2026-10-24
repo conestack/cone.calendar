@@ -164,7 +164,7 @@ export class Calendar {
             const path = event.composedPath();
             const inside_event = path.some((el) => el.classList?.contains('fc-event'));
 
-            if (!path.includes(this.menu) && !inside_event) {
+            if (!path.includes(this.menu[0]) && !inside_event) {
                 this.menu.remove();
                 document.removeEventListener('click', handler);
             }
