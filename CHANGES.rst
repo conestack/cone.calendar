@@ -1,7 +1,7 @@
 Changes
 =======
 
-2.0.0 (unreleased)
+2.0.0 (2026-10-24)
 ------------------
 
 - Add optional ``CalendarTile.calendar_title``, rendered as card header above
