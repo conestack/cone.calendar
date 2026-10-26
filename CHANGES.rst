@@ -4,6 +4,13 @@ Changes
 2.0.1 (unreleased)
 ------------------
 
+- Fix the position of the calendar context menu. On a horizontally scrolled
+  page, the menu opened left of the click position although there was room on
+  the right, and could leave the viewport on the left. A menu near the bottom
+  of the viewport was cut off. The menu opens above the click position now if
+  it does not fit below, and stays inside the viewport.
+  [rnix]
+
 - Fix the calendar context menu wrapper making the page longer by the height
   of the body instead of covering the viewport. A click outside of the menu
   could only hit the wrapper in that extra area. The wrapper renders a

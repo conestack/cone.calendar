@@ -163,6 +163,12 @@ var cone_calendar = (function (exports, $) {
             document.removeEventListener('click', this.on_outside_click);
             this.wrapper.remove();
         }
+        fit_into_viewport(pos, size, scroll, viewport_size) {
+            if (pos - scroll + size <= viewport_size) {
+                return pos;
+            }
+            return Math.max(pos - size, scroll);
+        }
         create_context_menu(actions, x, y) {
             const body = $('body', document);
             this.close_context_menu();
@@ -191,20 +197,12 @@ var cone_calendar = (function (exports, $) {
             for (const i in actions) {
                 this.add_menu_item(wrapper, menu, actions[i]);
             }
-            const menu_width = menu.outerWidth();
-            const viewport_width = $(window).width();
-            let final_left;
-            if (x + menu_width > viewport_width) {
-                final_left = x - menu_width;
-                if (final_left < 0) {
-                    final_left = 0;
-                }
-            } else {
-                final_left = x;
-            }
+            const win = $(window);
+            const left = this.fit_into_viewport(x, menu.outerWidth(), win.scrollLeft(), win.width());
+            const top = this.fit_into_viewport(y, menu.outerHeight(), win.scrollTop(), win.height());
             menu.css({
-                left: `${final_left}px`,
-                top: `${y}px`,
+                left: `${left}px`,
+                top: `${top}px`,
                 visibility: 'visible',
             });
             this.menu = menu;

@@ -113,6 +113,18 @@ function patch_window_width(width) {
     };
 }
 
+const orig_height = $.fn.height;
+
+// Fake the viewport height, jQuery height of other elements stays untouched
+function patch_window_height(height) {
+    $.fn.height = function (...args) {
+        if (this[0] === window) {
+            return height;
+        }
+        return orig_height.apply(this, args);
+    };
+}
+
 function next_tick() {
     return new Promise((resolve) => setTimeout(resolve, 0));
 }
@@ -1085,6 +1097,8 @@ QUnit.module('cone.calendar.Calendar.create_context_menu', (hooks) => {
 
     hooks.afterEach(() => {
         $.fn.width = orig_width;
+        $.fn.height = orig_height;
+        window.scrollTo(0, 0);
         untrack_document_click_listeners();
         container.remove();
         $('.calendar-contextmenu-wrapper').remove();
@@ -1209,6 +1223,99 @@ QUnit.module('cone.calendar.Calendar.create_context_menu', (hooks) => {
         calendar.create_context_menu([{ title: 'Edit' }], 60, 200);
 
         assert.strictEqual(calendar.menu.css('left'), '0px', 'menu at left viewport border');
+    });
+
+    QUnit.test('create_context_menu opens menu above y if it overflows', (assert) => {
+        const elem = $(`
+            <div id="calendar"
+                 data-calendar_target="/api/calendar"
+                 data-calendar_actions='[]'
+                 data-calendar_sources='[]'
+                 data-calendar_options='{}'>
+            </div>
+        `).appendTo(container);
+        $(
+            '<style>.calendar-contextmenu { height: 100px; padding: 0; border: 0; }</style>',
+        ).appendTo(container);
+        patch_window_height(300);
+        const calendar = new Calendar(elem);
+
+        calendar.create_context_menu([{ title: 'Edit' }], 100, 250);
+
+        assert.strictEqual(calendar.menu.css('top'), '150px', 'menu above y');
+        assert.strictEqual(calendar.menu.css('left'), '100px', 'menu left at x');
+    });
+
+    QUnit.test('create_context_menu keeps menu inside top viewport border', (assert) => {
+        const elem = $(`
+            <div id="calendar"
+                 data-calendar_target="/api/calendar"
+                 data-calendar_actions='[]'
+                 data-calendar_sources='[]'
+                 data-calendar_options='{}'>
+            </div>
+        `).appendTo(container);
+        $(
+            '<style>.calendar-contextmenu { height: 100px; padding: 0; border: 0; }</style>',
+        ).appendTo(container);
+        patch_window_height(150);
+        const calendar = new Calendar(elem);
+
+        calendar.create_context_menu([{ title: 'Edit' }], 100, 60);
+
+        assert.strictEqual(calendar.menu.css('top'), '0px', 'menu at top viewport border');
+    });
+
+    QUnit.test('create_context_menu considers horizontal page scroll', (assert) => {
+        const elem = $(`
+            <div id="calendar"
+                 data-calendar_target="/api/calendar"
+                 data-calendar_actions='[]'
+                 data-calendar_sources='[]'
+                 data-calendar_options='{}'>
+            </div>
+        `).appendTo(container);
+        $('<style>.calendar-contextmenu { width: 100px; padding: 0; border: 0; }</style>').appendTo(
+            container,
+        );
+        $('<div style="width: 5000px; height: 10px" />').appendTo(container);
+        window.scrollTo(1000, 0);
+        patch_window_width(300);
+        const calendar = new Calendar(elem);
+
+        calendar.create_context_menu([{ title: 'Edit' }], 1050, 200);
+        assert.strictEqual(calendar.menu.css('left'), '1050px', 'menu fits right of x');
+
+        calendar.create_context_menu([{ title: 'Edit' }], 1250, 200);
+        assert.strictEqual(calendar.menu.css('left'), '1150px', 'menu left of x');
+
+        patch_window_width(150);
+        calendar.create_context_menu([{ title: 'Edit' }], 1060, 200);
+        assert.strictEqual(calendar.menu.css('left'), '1000px', 'menu at left viewport border');
+    });
+
+    QUnit.test('create_context_menu considers vertical page scroll', (assert) => {
+        const elem = $(`
+            <div id="calendar"
+                 data-calendar_target="/api/calendar"
+                 data-calendar_actions='[]'
+                 data-calendar_sources='[]'
+                 data-calendar_options='{}'>
+            </div>
+        `).appendTo(container);
+        $(
+            '<style>.calendar-contextmenu { height: 100px; padding: 0; border: 0; }</style>',
+        ).appendTo(container);
+        $('<div style="height: 5000px" />').appendTo(container);
+        window.scrollTo(0, 1000);
+        patch_window_height(300);
+        const calendar = new Calendar(elem);
+
+        calendar.create_context_menu([{ title: 'Edit' }], 100, 1050);
+        assert.strictEqual(calendar.menu.css('top'), '1050px', 'menu fits below y');
+
+        calendar.create_context_menu([{ title: 'Edit' }], 100, 1250);
+        assert.strictEqual(calendar.menu.css('top'), '1150px', 'menu above y');
     });
 
     QUnit.test('create_context_menu does not extend the page', (assert) => {
