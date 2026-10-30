@@ -4,23 +4,26 @@ Changes
 2.0.1 (unreleased)
 ------------------
 
-- Fix the position of the calendar context menu. On a horizontally scrolled
-  page, the menu opened left of the click position although there was room on
-  the right, and could leave the viewport on the left. A menu near the bottom
-  of the viewport was cut off. The menu opens above the click position now if
-  it does not fit below, and stays inside the viewport.
+- Fix the calendar context menu being cut off at the bottom and staying in
+  place while the calendar scrolled beneath it. The menu is rendered beside
+  the calendar instead of in ``body`` and scrolls along with it, so it stays
+  at the date it was opened for. It opens below and right of the click
+  position if it fits into the visible part of the page - the viewport cut by
+  the scrolling ancestors of the calendar, the content area of cone.app - else
+  above or left of it, else as far inside as its size allows. The wrapper and
+  its overlay are gone: the overlay caught the wheel events. A click or right
+  click outside closes the menu.
   [rnix]
 
-- Fix the calendar context menu wrapper making the page longer by the height
-  of the body instead of covering the viewport. A click outside of the menu
-  could only hit the wrapper in that extra area. The wrapper renders a
-  transparent overlay covering the viewport below the menu now.
+- Add ``disabled``, ``tooltip`` and ``cssclass`` to calendar actions, and
+  ``Calendar.prepare_actions``, which prepares the targets of actions for a
+  menu opened by the caller. ``Calendar.add_menu_item`` takes the menu and the
+  action only.
   [rnix]
 
 - Fix the calendar context menu closing on a click on its padding. Closing the
   menu by an item click, a click outside of it, opening another menu or
-  destroying the calendar unregisters the outside click listener now. An
-  outside click removes the menu wrapper element too.
+  destroying the calendar unregisters the outside click listener now.
   [rnix]
 
 - Fix HTML injection via ``icon`` and ``title`` of calendar context menu

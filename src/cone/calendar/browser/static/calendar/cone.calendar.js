@@ -153,34 +153,49 @@ var cone_calendar = (function (exports, $) {
         close_on_outside_click() {
             this._outside_click_timer = setTimeout(() => {
                 document.addEventListener('click', this.on_outside_click);
+                document.addEventListener('contextmenu', this.on_outside_click);
             });
         }
         close_context_menu() {
-            if (!this.wrapper) {
+            if (!this.menu) {
                 return;
             }
             clearTimeout(this._outside_click_timer);
             document.removeEventListener('click', this.on_outside_click);
-            this.wrapper.remove();
+            document.removeEventListener('contextmenu', this.on_outside_click);
+            this.menu.remove();
+            this.menu = null;
         }
-        fit_into_viewport(pos, size, scroll, viewport_size) {
-            if (pos - scroll + size <= viewport_size) {
+        visible_area() {
+            const win = $(window);
+            const area = { left: 0, top: 0, right: win.width(), bottom: win.height() };
+            let el = this.elem[0].parentElement;
+            for (; el && el !== document.body; el = el.parentElement) {
+                const style = getComputedStyle(el);
+                if (style.overflowX === 'visible' && style.overflowY === 'visible') {
+                    continue;
+                }
+                const rect = el.getBoundingClientRect();
+                const left = rect.left + el.clientLeft;
+                const top = rect.top + el.clientTop;
+                area.left = Math.max(area.left, left);
+                area.top = Math.max(area.top, top);
+                area.right = Math.min(area.right, left + el.clientWidth);
+                area.bottom = Math.min(area.bottom, top + el.clientHeight);
+            }
+            return area;
+        }
+        fit_into_area(pos, size, start, end) {
+            if (pos + size <= end) {
                 return pos;
             }
-            return Math.max(pos - size, scroll);
+            if (pos - size >= start) {
+                return pos - size;
+            }
+            return Math.max(start, end - size);
         }
         create_context_menu(actions, x, y) {
-            const body = $('body', document);
             this.close_context_menu();
-            const wrapper = $('<div />').attr('class', 'calendar-contextmenu-wrapper');
-            this.wrapper = wrapper;
-            body.append(wrapper);
-            wrapper.on('click contextmenu', (e) => {
-                e.preventDefault();
-                if (e.target === wrapper[0]) {
-                    this.close_context_menu();
-                }
-            });
             const menu = $('<ul>')
                 .addClass(
                     'calendar-contextmenu dropdown-menu list-group ' +
@@ -193,37 +208,47 @@ var cone_calendar = (function (exports, $) {
                     visibility: 'hidden',
                     display: 'block',
                 });
-            body.append(menu);
-            for (const i in actions) {
-                this.add_menu_item(wrapper, menu, actions[i]);
+            this.elem.after(menu);
+            menu.on('contextmenu', (e) => {
+                e.preventDefault();
+            });
+            for (const action of actions) {
+                this.add_menu_item(menu, action);
             }
             const win = $(window);
-            const left = this.fit_into_viewport(x, menu.outerWidth(), win.scrollLeft(), win.width());
-            const top = this.fit_into_viewport(y, menu.outerHeight(), win.scrollTop(), win.height());
-            menu.css({
-                left: `${left}px`,
-                top: `${top}px`,
-                visibility: 'visible',
-            });
+            const scroll_left = win.scrollLeft();
+            const scroll_top = win.scrollTop();
+            const area = this.visible_area();
+            const left = this.fit_into_area(x - scroll_left, menu.outerWidth(), area.left, area.right);
+            const top = this.fit_into_area(y - scroll_top, menu.outerHeight(), area.top, area.bottom);
+            menu.offset({ left: left + scroll_left, top: top + scroll_top });
+            menu.css('visibility', 'visible');
             this.menu = menu;
-            wrapper.append(menu);
             this.close_on_outside_click();
         }
-        add_menu_item(_wrapper, menu, action) {
-            const menu_item = $('<li>').addClass('list-group-item list-group-item-action');
+        add_menu_item(menu, action) {
+            const menu_item = $('<li>').addClass('list-group-item');
             if (action.icon) {
                 $('<i>').addClass(action.icon).addClass('me-2').appendTo(menu_item);
             }
             $('<span>').text(action.title).appendTo(menu_item);
+            if (action.cssclass) {
+                menu_item.addClass(action.cssclass);
+            }
+            if (action.tooltip) {
+                menu_item.attr('title', action.tooltip);
+            }
             menu.append(menu_item);
-            menu_item.on(
-                'click',
-                function (e) {
-                    e.stopPropagation();
-                    this.close_context_menu();
-                    this.handle_action(action);
-                }.bind(this),
-            );
+            if (action.disabled) {
+                menu_item.addClass('disabled').attr('aria-disabled', 'true');
+                return;
+            }
+            menu_item.addClass('list-group-item-action');
+            menu_item.on('click', (e) => {
+                e.stopPropagation();
+                this.close_context_menu();
+                this.handle_action(action);
+            });
         }
         prepare_target(target, params) {
             if (!target.url) {
@@ -276,15 +301,18 @@ var cone_calendar = (function (exports, $) {
                 });
             }
         }
+        prepare_actions(actions, target, params) {
+            actions = JSON.parse(JSON.stringify(actions));
+            for (const action of actions) {
+                action.target = this.prepare_target(action.target || target, params);
+            }
+            return actions;
+        }
         handle_actions(actions, target, params, x, y) {
             if (!actions?.length) {
                 return;
             }
-            actions = JSON.parse(JSON.stringify(actions));
-            for (const i in actions) {
-                const action = actions[i];
-                action.target = this.prepare_target(action.target || target, params);
-            }
+            actions = this.prepare_actions(actions, target, params);
             if (actions.length === 1) {
                 const action = actions[0];
                 this.handle_action(action);

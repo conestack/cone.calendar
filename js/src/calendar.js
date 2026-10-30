@@ -168,45 +168,67 @@ export class Calendar {
     }
 
     close_on_outside_click() {
-        // delay adding listener to avoid immediately catching the open click
+        // delay adding listener to avoid immediately catching the open click.
+        // A right click outside closes the menu as well - one on another date
+        // opens the menu of that date instead.
         this._outside_click_timer = setTimeout(() => {
             document.addEventListener('click', this.on_outside_click);
+            document.addEventListener('contextmenu', this.on_outside_click);
         });
     }
 
     close_context_menu() {
-        if (!this.wrapper) {
+        if (!this.menu) {
             return;
         }
         clearTimeout(this._outside_click_timer);
         document.removeEventListener('click', this.on_outside_click);
-        // the wrapper contains the menu
-        this.wrapper.remove();
+        document.removeEventListener('contextmenu', this.on_outside_click);
+        this.menu.remove();
+        this.menu = null;
     }
 
-    // Position of the menu at ``pos``, flipped to the other side of ``pos`` if
-    // it overflows the viewport end, but not beyond the viewport start. ``pos``
-    // is a document coordinate, ``scroll`` the scroll offset of the viewport.
-    fit_into_viewport(pos, size, scroll, viewport_size) {
-        if (pos - scroll + size <= viewport_size) {
+    // Part of the viewport in which the menu is visible, in viewport
+    // coordinates. The menu sits beside the calendar, so every ancestor
+    // clipping its overflow - the scrolling content area of the page for one -
+    // clips the menu too.
+    visible_area() {
+        const win = $(window);
+        const area = { left: 0, top: 0, right: win.width(), bottom: win.height() };
+        let el = this.elem[0].parentElement;
+        // body and html clip at the viewport, which is the initial area
+        for (; el && el !== document.body; el = el.parentElement) {
+            const style = getComputedStyle(el);
+            if (style.overflowX === 'visible' && style.overflowY === 'visible') {
+                continue;
+            }
+            const rect = el.getBoundingClientRect();
+            const left = rect.left + el.clientLeft;
+            const top = rect.top + el.clientTop;
+            area.left = Math.max(area.left, left);
+            area.top = Math.max(area.top, top);
+            area.right = Math.min(area.right, left + el.clientWidth);
+            area.bottom = Math.min(area.bottom, top + el.clientHeight);
+        }
+        return area;
+    }
+
+    // Start of the menu on one axis: after ``pos`` if it fits into the area
+    // between ``start`` and ``end``, else before ``pos`` if it fits there, else
+    // as far inside the area as its size allows.
+    fit_into_area(pos, size, start, end) {
+        if (pos + size <= end) {
             return pos;
         }
-        return Math.max(pos - size, scroll);
+        if (pos - size >= start) {
+            return pos - size;
+        }
+        return Math.max(start, end - size);
     }
 
+    // ``x`` and ``y`` are document coordinates.
     create_context_menu(actions, x, y) {
-        const body = $('body', document);
         this.close_context_menu();
-        const wrapper = $('<div />').attr('class', 'calendar-contextmenu-wrapper');
-        this.wrapper = wrapper;
-        body.append(wrapper);
-        wrapper.on('click contextmenu', (e) => {
-            e.preventDefault();
-            if (e.target === wrapper[0]) {
-                this.close_context_menu();
-            }
-        });
-
         const menu = $('<ul>')
             .addClass(
                 'calendar-contextmenu dropdown-menu list-group ' +
@@ -220,41 +242,56 @@ export class Calendar {
                 visibility: 'hidden',
                 display: 'block',
             });
-        body.append(menu);
+        // Beside the calendar instead of in ``body``: the menu scrolls along
+        // with the calendar and stays at the date it was opened for. A menu in
+        // ``body`` stayed in place while the content area scrolled beneath it.
+        this.elem.after(menu);
+        menu.on('contextmenu', (e) => {
+            e.preventDefault();
+        });
 
-        for (const i in actions) {
-            this.add_menu_item(wrapper, menu, actions[i]);
+        for (const action of actions) {
+            this.add_menu_item(menu, action);
         }
 
         const win = $(window);
-        const left = this.fit_into_viewport(x, menu.outerWidth(), win.scrollLeft(), win.width());
-        const top = this.fit_into_viewport(y, menu.outerHeight(), win.scrollTop(), win.height());
-        menu.css({
-            left: `${left}px`,
-            top: `${top}px`,
-            visibility: 'visible',
-        });
+        const scroll_left = win.scrollLeft();
+        const scroll_top = win.scrollTop();
+        const area = this.visible_area();
+        const left = this.fit_into_area(x - scroll_left, menu.outerWidth(), area.left, area.right);
+        const top = this.fit_into_area(y - scroll_top, menu.outerHeight(), area.top, area.bottom);
+        // the containing block of the menu depends on the markup around the
+        // calendar, ``offset`` translates document coordinates into it
+        menu.offset({ left: left + scroll_left, top: top + scroll_top });
+        menu.css('visibility', 'visible');
 
         this.menu = menu;
-        wrapper.append(menu);
         this.close_on_outside_click();
     }
 
-    add_menu_item(_wrapper, menu, action) {
-        const menu_item = $('<li>').addClass('list-group-item list-group-item-action');
+    add_menu_item(menu, action) {
+        const menu_item = $('<li>').addClass('list-group-item');
         if (action.icon) {
             $('<i>').addClass(action.icon).addClass('me-2').appendTo(menu_item);
         }
         $('<span>').text(action.title).appendTo(menu_item);
+        if (action.cssclass) {
+            menu_item.addClass(action.cssclass);
+        }
+        if (action.tooltip) {
+            menu_item.attr('title', action.tooltip);
+        }
         menu.append(menu_item);
-        menu_item.on(
-            'click',
-            function (e) {
-                e.stopPropagation();
-                this.close_context_menu();
-                this.handle_action(action);
-            }.bind(this),
-        );
+        if (action.disabled) {
+            menu_item.addClass('disabled').attr('aria-disabled', 'true');
+            return;
+        }
+        menu_item.addClass('list-group-item-action');
+        menu_item.on('click', (e) => {
+            e.stopPropagation();
+            this.close_context_menu();
+            this.handle_action(action);
+        });
     }
 
     prepare_target(target, params) {
@@ -313,17 +350,20 @@ export class Calendar {
         }
     }
 
+    // Deep copy of ``actions``, each with its target prepared for ``params``.
+    prepare_actions(actions, target, params) {
+        actions = JSON.parse(JSON.stringify(actions));
+        for (const action of actions) {
+            action.target = this.prepare_target(action.target || target, params);
+        }
+        return actions;
+    }
+
     handle_actions(actions, target, params, x, y) {
         if (!actions?.length) {
             return;
         }
-        // get a deepcopy of given actions
-        actions = JSON.parse(JSON.stringify(actions));
-        // prepare action target
-        for (const i in actions) {
-            const action = actions[i];
-            action.target = this.prepare_target(action.target || target, params);
-        }
+        actions = this.prepare_actions(actions, target, params);
         // only one action defined, gets executed direclty
         if (actions.length === 1) {
             const action = actions[0];

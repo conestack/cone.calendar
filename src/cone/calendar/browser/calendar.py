@@ -320,6 +320,17 @@ class CalendarEvents(JSONView):
 
         ``confirm``
             Confirmation message as string. Optional.
+
+        ``disabled``
+            Render the menu item disabled, a click on it does nothing.
+            Optional.
+
+        ``tooltip``
+            Tooltip of the menu item as string, e.g. why it is disabled.
+            Optional.
+
+        ``cssclass``
+            Additional CSS class of the menu item. Optional.
         """
         raise NotImplementedError(
             'Abstract ``CalendarEvents`` does not implement ``events``'

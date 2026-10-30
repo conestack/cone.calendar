@@ -25,23 +25,22 @@
     }
 }
 
-// Transparent overlay below the context menu, a click on it closes the menu.
-// The overlay is a pseudo element and the wrapper stays static, a fixed
-// wrapper would become the containing block of the menu, which is positioned
-// in document coordinates. Clicks on the pseudo element target the wrapper.
-.calendar-contextmenu-wrapper::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-}
-
+// No overlay below the context menu: it would take the wheel events, and the
+// calendar could not be scrolled while the menu is open. An outside click
+// closes the menu (``Calendar.on_outside_click``).
 .calendar-contextmenu {
     z-index: 10000; // required for small viewport: fullcalendar renders dropdown
 
     li {
         cursor: pointer;
         white-space: nowrap;
+    }
+
+    // Bootstrap takes the pointer events off a disabled item, which hides its
+    // tooltip - the tooltip says why the item is disabled.
+    li.disabled {
+        pointer-events: auto;
+        cursor: not-allowed;
     }
 }
 
