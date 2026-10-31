@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "cone.calendar"
-version = "2.0.1.dev0"
+version = "2.0.1"
 description = "jQuery Fullcalendar integration for cone.app"
 dynamic = ["readme"]
 requires-python = ">=3.10"
