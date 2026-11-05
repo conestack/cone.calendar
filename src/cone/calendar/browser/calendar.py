@@ -1,5 +1,5 @@
 from cone.app.browser import render_main_template
-from cone.app.browser.utils import format_traceback
+from cone.app.browser.utils import client_error_message
 from cone.tile import Tile
 from cone.tile import tile
 from datetime import datetime
@@ -179,14 +179,14 @@ class JSONView:
         If success, dict contains data at key 'data'.
 
         If an exception is raised while computing, dict contains flag indicating
-        error happends at key 'error' and the formatted traceback at key
+        error happends at key 'error' and the message for the client at key
         'message'.
         """
         try:
             return dict(data=self.data())
         except Exception as e:
             logger.exception(e)
-            return dict(error=True, message=format_traceback())
+            return dict(error=True, message=client_error_message(self.request))
 
     def data(self):
         """Supposed to be implemented on subclass. Responsible to compute JSON

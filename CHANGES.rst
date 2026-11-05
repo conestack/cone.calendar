@@ -4,7 +4,9 @@ Changes
 2.0.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- The JSON views answer with a general message if computing fails, the traceback
+  goes to the log. Requires ``cone.app`` 2.1.1.
+  [rnix]
 
 
 2.0.1 (2026-10-31)

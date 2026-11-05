@@ -281,14 +281,8 @@ class TestJSONView(TileTestCase):
         res = view()
         self.assertEqual(sorted(res.keys()), ['error', 'message'])
         self.assertTrue(res['error'])
-        self.checkOutput(
-            """
-        <pre>Traceback (most recent call last):
-        ...
-        NotImplementedError:
-        Abstract ``JSONView`` does not implement ``data``\n</pre>
-        """,
-            res['message'],
+        self.assertEqual(
+            res['message'], 'An internal error occurred. Please try again later.'
         )
 
         class MyJSONView(JSONView):
@@ -331,14 +325,8 @@ class TestCalendarEvents(TileTestCase):
         res = events()
         self.assertEqual(sorted(res.keys()), ['error', 'message'])
         self.assertTrue(res['error'])
-        self.checkOutput(
-            """
-        <pre>Traceback (most recent call last):
-        ...
-        NotImplementedError:
-        Abstract ``CalendarEvents`` does not implement ``events``\n</pre>
-        """,
-            res['message'],
+        self.assertEqual(
+            res['message'], 'An internal error occurred. Please try again later.'
         )
 
         class MyEvents(CalendarEvents):
