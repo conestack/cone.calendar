@@ -349,6 +349,7 @@ class CalendarEvents(JSONView):
     name='calendar_event_drop',
     # context=IScheduled,
     accept='application/json',
+    request_method='POST',
     renderer='json',
     permission='view',
 )
@@ -363,6 +364,7 @@ class CalendarEventDrop(JSONView):
     name='calendar_event_resize',
     # context=IScheduled,
     accept='application/json',
+    request_method='POST',
     renderer='json',
     permission='view',
 )

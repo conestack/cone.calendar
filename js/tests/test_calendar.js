@@ -652,6 +652,7 @@ QUnit.module('cone.calendar.Calendar.json_request', (hooks) => {
         );
 
         assert.strictEqual(request_opts.url, '/api/events', 'correct url');
+        assert.strictEqual(request_opts.method, 'GET', 'reading is the default');
         assert.strictEqual(request_opts.type, 'json', 'type is json');
         assert.deepEqual(request_opts.params, { start: 123 }, 'params passed');
     });
@@ -2053,6 +2054,33 @@ QUnit.module('cone.calendar.Calendar.event_drop', (hooks) => {
         console.log = orig_console_log;
         container.remove();
         teardown_global_mocks();
+    });
+
+    QUnit.test('event_drop sends a POST request', (assert) => {
+        const elem = $(`
+            <div id="calendar"
+                 data-calendar_target="/api/calendar"
+                 data-calendar_actions='[]'
+                 data-calendar_sources='[]'
+                 data-calendar_options='{}'>
+            </div>
+        `).appendTo(container);
+        const calendar = new Calendar(elem);
+        let request_opts = null;
+        window.bdajax.request = (opts) => {
+            request_opts = opts;
+        };
+        const event = {
+            id: 'event',
+            start: new Date(0),
+            end: new Date(1000),
+            extendedProps: { target: '/api/event' },
+        };
+
+        calendar.event_drop({ event, delta: { days: 0, milliseconds: 0 }, revert: () => {} });
+
+        assert.strictEqual(request_opts.url, '/api/event/calendar_event_drop');
+        assert.strictEqual(request_opts.method, 'POST');
     });
 
     QUnit.test('event_drop callback logs response data', (assert) => {

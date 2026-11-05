@@ -16,6 +16,7 @@ from cone.tile.tests import TileTestCase
 from datetime import datetime
 from node.utils import instance_property
 from pyramid.httpexceptions import HTTPForbidden
+from pyramid.request import Request
 from zope.interface import implementer
 from zope.interface.verify import verifyObject
 import json
@@ -293,6 +294,15 @@ class TestJSONView(TileTestCase):
         res = view()
         self.assertEqual(sorted(res.keys()), ['data'])
         self.assertEqual(res['data'], 'data')
+
+    def test_event_drop_and_resize_answer_post_only(self):
+        headers = {'Accept': 'application/json'}
+        for view in ('calendar_event_drop', 'calendar_event_resize'):
+            with self.subTest(view=view):
+                request = Request.blank(f'/{view}', headers=headers)
+                self.assertEqual(request.get_response(self.layer.app).status_int, 404)
+                request = Request.blank(f'/{view}', method='POST', headers=headers)
+                self.assertEqual(request.get_response(self.layer.app).status_int, 403)
 
     def test_event_drop_and_resize_views(self):
         model = CalendarNode(name='calendar')

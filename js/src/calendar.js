@@ -135,9 +135,10 @@ export class Calendar {
         this._window_width = width;
     }
 
-    json_request(url, params, callback, errback) {
+    json_request(url, params, callback, errback, method = 'GET') {
         bdajax.request({
             url: url,
+            method: method,
             type: 'json',
             params: params,
             success: (data) => {
@@ -415,7 +416,7 @@ export class Calendar {
             delta: Math.round((delta.days * 86400000 + delta.milliseconds) / 1000), // moment.js dropped in v5
         });
         const url = `${target.url}/${view}`;
-        this.json_request(url, target.params, callback, revert_func);
+        this.json_request(url, target.params, callback, revert_func, 'POST');
     }
 
     event_drop(info) {

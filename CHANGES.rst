@@ -4,6 +4,10 @@ Changes
 2.0.2 (unreleased)
 ------------------
 
+- The views ``calendar_event_drop`` and ``calendar_event_resize`` only accept
+  ``POST`` requests, an event gets moved or resized with this method.
+  [rnix]
+
 - The JSON views answer with a general message if computing fails, the traceback
   goes to the log. Requires ``cone.app`` 2.1.1.
   [rnix]
