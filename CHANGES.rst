@@ -1,7 +1,7 @@
 Changes
 =======
 
-2.0.2 (unreleased)
+2.1.0 (unreleased)
 ------------------
 
 - The views ``calendar_event_drop`` and ``calendar_event_resize`` only accept
@@ -9,7 +9,7 @@ Changes
   [rnix]
 
 - The JSON views answer with a general message if computing fails, the traceback
-  goes to the log. Requires ``cone.app`` 2.1.1.
+  goes to the log. Requires ``cone.app`` 2.2.0.
   [rnix]
 
 
