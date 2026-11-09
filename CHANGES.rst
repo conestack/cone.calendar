@@ -1,7 +1,7 @@
 Changes
 =======
 
-2.1.0 (unreleased)
+2.1.0 (2026-11-09)
 ------------------
 
 - The views ``calendar_event_drop`` and ``calendar_event_resize`` only accept
